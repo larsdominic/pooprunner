@@ -9,7 +9,7 @@
 
   body {
     background: linear-gradient(180deg, #87CEEB 0%, #87CEEB 60%, #90EE90 60%, #228B22 100%);
-    height: 100vh;
+    height: 100dvh;
     overflow: hidden;
     font-family: sans-serif;
   }
@@ -54,7 +54,7 @@
 
   .ground-line {
     position: absolute;
-    bottom: 40%;
+    bottom: var(--ground);
     width: 100%;
     height: 3px;
     background: rgba(0,0,0,0.1);
@@ -63,7 +63,7 @@
   /* Kid wrapper — bottom edge = ground line */
   .kid-wrapper {
     position: absolute;
-    bottom: 40%;
+    bottom: var(--ground);
     animation: runAcross 3.5s linear infinite, bounce 0.35s ease-in-out infinite alternate;
   }
   .kid-wrapper.jumping {
@@ -74,13 +74,13 @@
     to   { left: 110vw; }
   }
   @keyframes bounce {
-    from { bottom: 40%; }
-    to   { bottom: calc(40% + 6px); }
+    from { bottom: var(--ground); }
+    to   { bottom: calc(var(--ground) + 6px); }
   }
   @keyframes jumpArc {
-    0%   { bottom: 40%; }
-    40%  { bottom: calc(40% + 160px); }
-    100% { bottom: 40%; }
+    0%   { bottom: var(--ground); }
+    40%  { bottom: calc(var(--ground) + 160px); }
+    100% { bottom: var(--ground); }
   }
   .kid-wrapper.jumping .leg-left,
   .kid-wrapper.jumping .leg-right { animation: none; transform: rotate(0deg); }
@@ -210,7 +210,7 @@
   /* Poop obstacle — bottom sits on ground line */
   .poop {
     position: absolute;
-    bottom: calc(40% - 4px);
+    bottom: calc(var(--ground) - 4px);
     font-size: 2.8rem;
     line-height: 1;
     animation: poopSlide 4s linear infinite;
@@ -314,6 +314,14 @@
   </div>
 
 <script>
+  // Set ground as fixed px from actual viewport — fixes iOS 40% mismatch
+  function setGround() {
+    var groundPx = window.innerHeight * 0.4;
+    document.documentElement.style.setProperty("--ground", groundPx + "px");
+  }
+  setGround();
+  window.addEventListener("resize", setGround);
+
   const wrapper = document.querySelector('.kid-wrapper');
   const poops = document.querySelectorAll('.poop');
   const label = document.querySelector('.label');
