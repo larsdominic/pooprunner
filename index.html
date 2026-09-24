@@ -343,7 +343,6 @@
   const label = document.querySelector('.label');
   const scoreEl = document.querySelector('.score');
   let score = 0;
-  const passedPoops = new WeakSet();
   let jumping = false;
   let dead = false;
   let collisionLoop;
@@ -364,6 +363,11 @@
     if (dead) return restart();
     if (jumping) return;
     jumping = true;
+    score++;
+    scoreEl.textContent = '💩 ' + score;
+    scoreEl.classList.remove('pop');
+    void scoreEl.offsetWidth;
+    scoreEl.classList.add('pop');
     wrapper.classList.add('jumping');
     wrapper.addEventListener('animationend', (ev) => {
       if (ev.animationName === 'jumpArc') {
@@ -393,15 +397,6 @@
                       kidHit.top   < pr.bottom &&
                       kidHit.bottom > pr.top;
       if (overlap) { gameOver(); return; }
-      // score when poop has fully passed the kid
-      if (!passedPoops.has(poop) && pr.right < kidHit.left) {
-        passedPoops.add(poop);
-        score++;
-        scoreEl.textContent = '💩 ' + score;
-        scoreEl.classList.remove('pop');
-        void scoreEl.offsetWidth;
-        scoreEl.classList.add('pop');
-      }
     }
   }
 
