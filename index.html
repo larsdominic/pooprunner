@@ -269,6 +269,21 @@
     50%       { transform: translateX(-50%) rotate(2deg); }
   }
 
+  .score {
+    position: absolute;
+    top: 16px; left: 16px;
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.4);
+  }
+  @keyframes scorePop {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.6); }
+    100% { transform: scale(1); }
+  }
+  .score.pop { animation: scorePop 0.25s ease-out; }
+
   .hint {
     position: absolute;
     bottom: 20px; left: 50%;
@@ -285,6 +300,7 @@
 
   <div class="label">James Poop Runner</div>
   <div class="hint">SPACE or TAP to jump</div>
+  <div class="score">💩 0</div>
   <div class="sun"></div>
   <div class="cloud cloud1"></div>
   <div class="cloud cloud2"></div>
@@ -325,7 +341,9 @@
   const wrapper = document.querySelector('.kid-wrapper');
   const poops = document.querySelectorAll('.poop');
   const label = document.querySelector('.label');
-  let jumping = false;
+  const scoreEl = document.querySelector('.score');
+  let score = 0;
+  const passedPoops = new WeakSet();
   let dead = false;
   let collisionLoop;
 
@@ -361,7 +379,6 @@
   function checkCollision() {
     if (dead || jumping) return;
     const kidRect = getRect(wrapper);
-    // Use a slimmer hitbox for the kid body (not the head)
     const kidHit = {
       left:   kidRect.left + 15,
       right:  kidRect.left + 65,
@@ -375,6 +392,15 @@
                       kidHit.top   < pr.bottom &&
                       kidHit.bottom > pr.top;
       if (overlap) { gameOver(); return; }
+      // score when poop has fully passed the kid
+      if (!passedPoops.has(poop) && pr.right < kidHit.left) {
+        passedPoops.add(poop);
+        score++;
+        scoreEl.textContent = '💩 ' + score;
+        scoreEl.classList.remove('pop');
+        void scoreEl.offsetWidth;
+        scoreEl.classList.add('pop');
+      }
     }
   }
 
@@ -452,6 +478,9 @@
 
   function restart() {
     dead = false;
+    score = 0;
+    scoreEl.textContent = '💩 0';
+    scoreEl.classList.remove('pop');
     wrapper.querySelector('.kid').classList.remove('crying');
     wrapper.style = '';
     poops.forEach(p => { p.style.right = ''; p.style.animation = ''; });
