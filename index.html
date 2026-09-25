@@ -60,18 +60,15 @@
     background: rgba(0,0,0,0.1);
   }
 
-  /* Kid wrapper — bottom edge = ground line */
+  /* Kid wrapper — fixed on the right-ish; world scrolls past */
   .kid-wrapper {
     position: absolute;
     bottom: var(--ground);
-    animation: runAcross 3.5s linear infinite, bounce 0.35s ease-in-out infinite alternate;
+    left: 32vw;
+    animation: bounce 0.12s ease-in-out infinite alternate;
   }
   .kid-wrapper.jumping {
-    animation: runAcross 3.5s linear infinite, jumpArc 0.6s ease-out forwards;
-  }
-  @keyframes runAcross {
-    from { left: -160px; }
-    to   { left: 110vw; }
+    animation: jumpArc 0.6s ease-out forwards;
   }
   @keyframes bounce {
     from { bottom: var(--ground); }
@@ -86,6 +83,180 @@
   .kid-wrapper.jumping .leg-right { animation: none; transform: rotate(0deg); }
   .kid-wrapper.jumping .arm-left  { animation: none; transform: rotate(-80deg); }
   .kid-wrapper.jumping .arm-right { animation: none; transform: rotate(-80deg); }
+
+  /* ===== Border collie chasing the kid ===== */
+  .dog {
+    position: absolute;
+    bottom: var(--ground);
+    left: 8vw;
+    width: 90px;
+    height: 0;
+    transform-origin: bottom left;
+    animation: dogBob 0.12s ease-in-out infinite alternate, dogLunge 0.5s ease-in-out infinite;
+    z-index: 3;
+  }
+  @keyframes dogBob {
+    from { bottom: var(--ground); }
+    to   { bottom: calc(var(--ground) + 10px); }
+  }
+  .dog.jumping {
+    animation: dogJump 0.55s ease-out forwards, dogLunge 0.5s ease-in-out infinite;
+  }
+  @keyframes dogJump {
+    0%   { bottom: var(--ground); }
+    45%  { bottom: calc(var(--ground) + 150px); }
+    100% { bottom: var(--ground); }
+  }
+  @keyframes dogLunge {
+    0%   { transform: scale(1.6) translateX(0)   rotate(0deg); }
+    50%  { transform: scale(1.6) translateX(14px) rotate(3deg); }
+    100% { transform: scale(1.6) translateX(0)   rotate(0deg); }
+  }
+  /* freeze legs mid-jump */
+  .dog.jumping .dleg { animation: none; transform: rotate(0deg); }
+
+  /* Game over: dog stops running, trots over to the fallen kid, then licks */
+  .dog.comforting {
+    animation: none;
+    transform: scale(1.6);
+    transition: left 1s ease-in-out;
+  }
+  .dog.comforting .dleg { animation: dLegA 0.25s ease-in-out infinite alternate; }
+  .dog.comforting .dleg-fr,
+  .dog.comforting .dleg-bl { animation: dLegB 0.25s ease-in-out infinite alternate; }
+  .dog.comforting .tail { animation: dogTail 0.12s ease-in-out infinite alternate; }
+
+  /* once reached the kid: legs stop, only tongue + tail move */
+  .dog.licking .dleg { animation: none; transform: rotate(0deg); }
+
+  /* licking tongue */
+  .dog .tongue {
+    position: absolute;
+    bottom: 30px; left: 94px;
+    width: 8px; height: 14px;
+    background: #ff6b9d;
+    border-radius: 4px 4px 6px 6px;
+    transform-origin: top center;
+    opacity: 0;
+  }
+  .dog.licking .tongue {
+    opacity: 1;
+    animation: lick 0.35s ease-in-out infinite alternate;
+  }
+  @keyframes lick {
+    from { transform: rotate(-10deg) scaleY(0.7); }
+    to   { transform: rotate(20deg)  scaleY(1.1); }
+  }
+
+  /* floating love hearts */
+  .love-heart {
+    position: fixed;
+    font-size: 1.6rem;
+    pointer-events: none;
+    z-index: 998;
+    animation: floatHeart 1.6s ease-out forwards;
+  }
+  @keyframes floatHeart {
+    0%   { transform: translateY(0) scale(0.4);   opacity: 0; }
+    20%  { opacity: 1; }
+    100% { transform: translateY(-90px) scale(1.2); opacity: 0; }
+  }
+  /* body */
+  .dog .body {
+    position: absolute;
+    bottom: 20px; left: 8px;
+    width: 62px; height: 30px;
+    background: #2b2b2b;
+    border-radius: 16px 20px 12px 12px;
+  }
+  /* white chest/belly patch */
+  .dog .body::after {
+    content: '';
+    position: absolute;
+    bottom: -2px; left: 6px;
+    width: 40px; height: 16px;
+    background: #f5f5f5;
+    border-radius: 12px;
+  }
+  /* head */
+  .dog .head-d {
+    position: absolute;
+    bottom: 34px; left: 56px;
+    width: 30px; height: 26px;
+    background: #2b2b2b;
+    border-radius: 14px 16px 10px 12px;
+  }
+  /* white blaze on face */
+  .dog .head-d::after {
+    content: '';
+    position: absolute;
+    top: 4px; left: 11px;
+    width: 8px; height: 18px;
+    background: #f5f5f5;
+    border-radius: 6px;
+  }
+  /* snout */
+  .dog .snout {
+    position: absolute;
+    bottom: 34px; left: 82px;
+    width: 14px; height: 12px;
+    background: #2b2b2b;
+    border-radius: 6px 8px 8px 6px;
+  }
+  .dog .snout::after {
+    content: '';
+    position: absolute;
+    top: 2px; right: 0;
+    width: 5px; height: 5px;
+    background: #111;
+    border-radius: 50%;
+  }
+  /* ear */
+  .dog .ear {
+    position: absolute;
+    bottom: 56px; left: 60px;
+    width: 12px; height: 14px;
+    background: #2b2b2b;
+    border-radius: 6px 6px 0 0;
+    transform: rotate(-10deg);
+  }
+  /* tail */
+  .dog .tail {
+    position: absolute;
+    bottom: 30px; left: -6px;
+    width: 22px; height: 10px;
+    background: #2b2b2b;
+    border-radius: 8px;
+    transform-origin: right center;
+    animation: dogTail 0.08s ease-in-out infinite alternate;
+  }
+  .dog .tail::after {
+    content: '';
+    position: absolute;
+    left: 0; top: -2px;
+    width: 10px; height: 12px;
+    background: #f5f5f5;
+    border-radius: 6px;
+  }
+  @keyframes dogTail {
+    from { transform: rotate(-30deg); }
+    to   { transform: rotate(35deg); }
+  }
+  /* legs */
+  .dog .dleg {
+    position: absolute;
+    bottom: 0;
+    width: 8px; height: 22px;
+    background: #2b2b2b;
+    border-radius: 4px;
+    transform-origin: top center;
+  }
+  .dog .dleg-fl { left: 60px; animation: dLegA 0.1s ease-in-out infinite alternate; }
+  .dog .dleg-fr { left: 50px; animation: dLegB 0.1s ease-in-out infinite alternate; }
+  .dog .dleg-bl { left: 20px; animation: dLegB 0.1s ease-in-out infinite alternate; }
+  .dog .dleg-br { left: 10px; animation: dLegA 0.1s ease-in-out infinite alternate; }
+  @keyframes dLegA { from { transform: rotate(-55deg); } to { transform: rotate(50deg); } }
+  @keyframes dLegB { from { transform: rotate(50deg); }  to { transform: rotate(-55deg); } }
 
   /* .kid is a zero-height anchor at ground level; all parts grow upward via negative bottom */
   .kid {
@@ -118,11 +289,11 @@
   .leg-left, .leg-right {
     position: absolute;
     width: 16px; height: 46px; /* leg shaft 36px + shoe 10px */
-    bottom: 8px;
+    bottom: 0;
     transform-origin: top center;
   }
-  .leg-left  { left: 16px; animation: legLeft  0.35s ease-in-out infinite alternate; }
-  .leg-right { left: 48px; animation: legRight 0.35s ease-in-out infinite alternate; }
+  .leg-left  { left: 16px; animation: legLeft  0.1s ease-in-out infinite alternate; }
+  .leg-right { left: 48px; animation: legRight 0.1s ease-in-out infinite alternate; }
   @keyframes legLeft  { from { transform: rotate(-40deg); } to { transform: rotate(35deg); } }
   @keyframes legRight { from { transform: rotate(35deg); }  to { transform: rotate(-40deg); } }
 
@@ -163,8 +334,8 @@
     bottom: 42px;
     transform-origin: top center;
   }
-  .arm-left  { left: 8px;  animation: armLeft  0.35s ease-in-out infinite alternate; }
-  .arm-right { left: 58px; animation: armRight 0.35s ease-in-out infinite alternate; }
+  .arm-left  { left: 8px;  animation: armLeft  0.1s ease-in-out infinite alternate; }
+  .arm-right { left: 58px; animation: armRight 0.1s ease-in-out infinite alternate; }
   @keyframes armLeft  { from { transform: rotate(-60deg); } to { transform: rotate(30deg); } }
   @keyframes armRight { from { transform: rotate(30deg); }  to { transform: rotate(-60deg); } }
 
@@ -193,7 +364,7 @@
     transform: translateX(-50%);
     width: 110px;
     height: 110px;
-    animation: bobble 0.35s ease-in-out infinite alternate;
+    animation: bobble 0.12s ease-in-out infinite alternate;
     transform-origin: bottom center;
   }
   .head img {
@@ -213,11 +384,10 @@
     bottom: calc(var(--ground) - 4px);
     font-size: 2.8rem;
     line-height: 1;
-    animation: poopSlide 4s linear infinite;
+    right: -80px;
     cursor: default;
     user-select: none;
   }
-  #poop1 { animation-duration: 3.6s; animation-delay: 0s; }
   @keyframes poopSlide {
     from { right: -80px; }
     to   { right: 110vw; }
@@ -310,7 +480,22 @@
   <div class="dust"></div>
 
   <!-- Poop obstacles -->
-  <div class="poop" id="poop1">💩</div>
+  <!-- poops are spawned dynamically -->
+
+
+  <!-- Border collie chasing the kid -->
+  <div class="dog">
+    <div class="tail"></div>
+    <div class="body"></div>
+    <div class="dleg dleg-bl"></div>
+    <div class="dleg dleg-br"></div>
+    <div class="dleg dleg-fl"></div>
+    <div class="dleg dleg-fr"></div>
+    <div class="head-d"></div>
+    <div class="ear"></div>
+    <div class="snout"></div>
+    <div class="tongue"></div>
+  </div>
 
   <div class="kid-wrapper">
     <div class="kid">
@@ -337,13 +522,82 @@
   window.addEventListener("resize", setGround);
 
   const wrapper = document.querySelector('.kid-wrapper');
-  const poops = document.querySelectorAll('.poop');
+  const dog = document.querySelector('.dog');
   const label = document.querySelector('.label');
   const scoreEl = document.querySelector('.score');
   let score = 0;
   let jumping = false;
+  let dogJumping = false;
   let dead = false;
   let collisionLoop;
+  let spawnTimer;
+  let poopId = 0;           // unique id per poop instance
+
+  /* ---- Sound (Web Audio, no files needed) ---- */
+  let audioCtx;
+  function sfx(type) {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      if (type === 'jump') {
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(300, now);
+        osc.frequency.exponentialRampToValueAtTime(700, now + 0.15);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+        osc.start(now); osc.stop(now + 0.2);
+      } else if (type === 'splat') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(200, now);
+        osc.frequency.exponentialRampToValueAtTime(40, now + 0.3);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        osc.start(now); osc.stop(now + 0.35);
+      }
+    } catch (e) { /* audio not available — ignore */ }
+  }
+
+  /* ---- Randomized poop launch: fresh element each crossing ---- */
+  const activePoops = [];   // { el, id, cleared, scored }
+
+  function launchPoop() {
+    if (dead) return;
+    // Decide how many poops in this wave: mix of singles and clusters
+    const r = Math.random();
+    const count = r < 0.45 ? 1 : (r < 0.8 ? 2 : 3);
+    // one speed for the whole wave so cluster poops stay tightly packed (jumpable in one arc)
+    const dur = 1.6 + Math.random() * 2.6;  // 1.6s (fast) – 4.2s (slow)
+    let maxTotal = 0;
+    for (let i = 0; i < count; i++) {
+      // tiny stagger keeps them touching — one jump clears the whole clump
+      const delay = i * 0.18;
+      maxTotal = Math.max(maxTotal, dur + delay);
+      spawnOne(dur, delay);
+    }
+    // next wave after this one clears + a random gap (always land-able)
+    const gap = (maxTotal * 1000) + 700 + Math.random() * 1500; // 0.7s–2.2s extra
+    spawnTimer = setTimeout(launchPoop, gap);
+  }
+
+  function spawnOne(dur, delay) {
+    poopId++;
+    const el = document.createElement('div');
+    el.className = 'poop';
+    el.textContent = '💩';
+    el.style.animation = `poopSlide ${dur}s ${delay}s linear forwards`;
+    document.body.appendChild(el);
+    const rec = { el, id: poopId, scored: false };
+    activePoops.push(rec);
+    el.addEventListener('animationend', () => {
+      el.remove();
+      const i = activePoops.indexOf(rec);
+      if (i !== -1) activePoops.splice(i, 1);
+    }, { once: true });
+  }
 
   document.addEventListener('keydown', (e) => {
     if (e.code === 'Space') {
@@ -361,11 +615,7 @@
     if (dead) return restart();
     if (jumping) return;
     jumping = true;
-    score++;
-    scoreEl.textContent = '💩 ' + score;
-    scoreEl.classList.remove('pop');
-    void scoreEl.offsetWidth;
-    scoreEl.classList.add('pop');
+    sfx('jump');
     wrapper.classList.add('jumping');
     wrapper.addEventListener('animationend', (ev) => {
       if (ev.animationName === 'jumpArc') {
@@ -379,8 +629,20 @@
     return el.getBoundingClientRect();
   }
 
+  function dogJump() {
+    if (dogJumping || dead) return;
+    dogJumping = true;
+    dog.classList.add('jumping');
+    dog.addEventListener('animationend', (ev) => {
+      if (ev.animationName === 'dogJump') {
+        dog.classList.remove('jumping');
+        dogJumping = false;
+      }
+    }, { once: true });
+  }
+
   function checkCollision() {
-    if (dead || jumping) return;
+    if (dead) return;
     const kidRect = getRect(wrapper);
     const kidHit = {
       left:   kidRect.left + 15,
@@ -388,13 +650,35 @@
       top:    kidRect.top  - 120,
       bottom: kidRect.top
     };
-    for (const poop of poops) {
-      const pr = getRect(poop);
-      const overlap = kidHit.left < pr.right &&
-                      kidHit.right > pr.left &&
-                      kidHit.top   < pr.bottom &&
-                      kidHit.bottom > pr.top;
-      if (overlap) { gameOver(); return; }
+    const dogRect = getRect(dog);
+    const dogCenter = (dogRect.left + dogRect.right) / 2;
+    for (const rec of activePoops) {
+      const pr = getRect(rec.el);
+      const tightOverlap = kidHit.left < pr.right && kidHit.right > pr.left;
+
+      // ground collision only when not jumping
+      if (!jumping) {
+        const hit = tightOverlap &&
+                    kidHit.top < pr.bottom &&
+                    kidHit.bottom > pr.top;
+        if (hit) { gameOver(); return; }
+      }
+
+      // dog auto-jumps when a poop approaches it
+      const pCenter = (pr.left + pr.right) / 2;
+      if (!dogJumping && pCenter > dogCenter - 70 && pCenter < dogCenter + 40) {
+        dogJump();
+      }
+
+      // poop fully passed the kid → +1 (each poop counted once)
+      if (!rec.scored && pr.right < kidHit.left) {
+        rec.scored = true;
+        score++;
+        scoreEl.textContent = '💩 ' + score;
+        scoreEl.classList.remove('pop');
+        void scoreEl.offsetWidth;
+        scoreEl.classList.add('pop');
+      }
     }
   }
 
@@ -435,7 +719,9 @@
 
   function gameOver() {
     dead = true;
+    sfx('splat');
     cancelAnimationFrame(collisionLoop);
+    clearTimeout(spawnTimer);
 
     // Find collision point (centre of kid body)
     const kr = getRect(wrapper);
@@ -447,11 +733,11 @@
     wrapper.style.left = cs.left;
     wrapper.style.bottom = cs.bottom;
     wrapper.style.animation = 'none';
-    // Freeze poops
-    poops.forEach(p => {
-      const ps = getComputedStyle(p);
-      p.style.right = (window.innerWidth - parseFloat(ps.left) - p.offsetWidth) + 'px';
-      p.style.animation = 'none';
+    // Freeze all active poops in place
+    activePoops.forEach(rec => {
+      const ps = getComputedStyle(rec.el);
+      rec.el.style.right = ps.right;
+      rec.el.style.animation = 'none';
     });
     // Splat the kid
     wrapper.style.transform = 'rotate(90deg) translateX(-40px)';
@@ -468,21 +754,60 @@
 
     // Restart hint
     document.querySelector('.hint').textContent = 'Tap or SPACE to try again';
+
+    // Dog trots over to comfort the fallen kid, then licks with love hearts
+    dog.classList.remove('jumping');
+    dogJumping = false;
+    dog.classList.add('comforting');
+    // move dog next to the kid (kid fell to the right of its wrapper)
+    const targetLeft = kr.left - 30;
+    dog.style.left = targetLeft + 'px';
+    setTimeout(() => {
+      if (!dead) return;               // player may have restarted
+      dog.classList.add('licking');
+      spawnHearts();
+      heartTimer = setInterval(() => { if (dead) spawnHearts(); }, 900);
+    }, 1050);
+  }
+
+  let heartTimer;
+  function spawnHearts() {
+    const dr = getRect(dog);
+    for (let i = 0; i < 3; i++) {
+      const h = document.createElement('div');
+      h.className = 'love-heart';
+      h.textContent = ['❤️','💛','💕'][i % 3];
+      h.style.left = (dr.right - 10 + (i - 1) * 18) + 'px';
+      h.style.top  = (dr.top + 6) + 'px';
+      document.body.appendChild(h);
+      setTimeout(() => h.remove(), 1700);
+    }
   }
 
   function restart() {
     dead = false;
     score = 0;
+    poopId = 0;
+    dogJumping = false;
+    dog.classList.remove('jumping', 'comforting', 'licking');
+    dog.style.left = '';        // back to CSS default (8vw)
+    dog.style.transition = '';
+    clearInterval(heartTimer);
+    document.querySelectorAll('.love-heart').forEach(h => h.remove());
     scoreEl.textContent = '💩 0';
     scoreEl.classList.remove('pop');
     wrapper.querySelector('.kid').classList.remove('crying');
     wrapper.style = '';
-    poops.forEach(p => { p.style.right = ''; p.style.animation = ''; });
+    // remove any leftover poop elements
+    activePoops.forEach(rec => rec.el.remove());
+    activePoops.length = 0;
     label.textContent = 'James Poop Runner';
     label.style.fontSize = '';
     label.style.animation = '';
     document.querySelector('.hint').textContent = 'SPACE or TAP to jump';
     loop();
+    clearTimeout(spawnTimer);
+    spawnTimer = setTimeout(launchPoop, 800);
   }
 
   function loop() {
@@ -491,6 +816,7 @@
     collisionLoop = requestAnimationFrame(loop);
   }
   loop();
+  spawnTimer = setTimeout(launchPoop, 800);
 </script>
 </body>
 </html>
