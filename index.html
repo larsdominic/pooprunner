@@ -463,6 +463,7 @@
     text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
     letter-spacing: 0.1em;
     pointer-events: none;
+    white-space: nowrap;
   }
 
   /* ===== Mobile / narrow screens ===== */
@@ -487,6 +488,8 @@
     /* smaller title + score */
     .label { font-size: 1.5rem; }
     .score { font-size: 1.1rem; }
+    /* keep hint on one line on narrow screens */
+    .hint { font-size: 0.9rem; letter-spacing: 0.03em; }
   }
 </style>
 </head>
