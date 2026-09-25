@@ -623,7 +623,7 @@
     el.textContent = '💩';
     el.style.animation = `poopSlide ${dur}s ${delay}s linear forwards`;
     document.body.appendChild(el);
-    const rec = { el, id: poopId, scored: false };
+    const rec = { el, id: poopId, scored: false, dogTriggered: false };
     activePoops.push(rec);
     el.addEventListener('animationend', () => {
       el.remove();
@@ -700,9 +700,10 @@
         if (hit) { gameOver(); return; }
       }
 
-      // dog auto-jumps when a poop approaches it
+      // dog auto-jumps when a poop approaches it — once per poop
       const pCenter = (pr.left + pr.right) / 2;
-      if (!dogJumping && pCenter > dogCenter - 70 && pCenter < dogCenter + 40) {
+      if (!rec.dogTriggered && !dogJumping && pCenter > dogCenter - 70 && pCenter < dogCenter + 40) {
+        rec.dogTriggered = true;
         dogJump();
       }
 
