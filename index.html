@@ -108,9 +108,9 @@
     100% { bottom: var(--ground); }
   }
   @keyframes dogLunge {
-    0%   { transform: scale(1.6) translateX(0)   rotate(0deg); }
-    50%  { transform: scale(1.6) translateX(14px) rotate(3deg); }
-    100% { transform: scale(1.6) translateX(0)   rotate(0deg); }
+    0%   { transform: scale(var(--dog-scale, 1.6)) translateX(0)   rotate(0deg); }
+    50%  { transform: scale(var(--dog-scale, 1.6)) translateX(14px) rotate(3deg); }
+    100% { transform: scale(var(--dog-scale, 1.6)) translateX(0)   rotate(0deg); }
   }
   /* freeze legs mid-jump */
   .dog.jumping .dleg { animation: none; transform: rotate(0deg); }
@@ -118,7 +118,7 @@
   /* Game over: dog stops running, trots over to the fallen kid, then licks */
   .dog.comforting {
     animation: none;
-    transform: scale(1.6);
+    transform: scale(var(--dog-scale, 1.6));
     transition: left 1s ease-in-out;
   }
   .dog.comforting .dleg { animation: dLegA 0.25s ease-in-out infinite alternate; }
@@ -464,6 +464,30 @@
     letter-spacing: 0.1em;
     pointer-events: none;
   }
+
+  /* ===== Mobile / narrow screens ===== */
+  @media (max-width: 600px) {
+    /* smaller dog, tucked to the far left so it doesn't overlap the kid */
+    .dog {
+      --dog-scale: 0.9;
+      left: 4vw;
+    }
+    /* shrink the kid and keep it anchored on the ground */
+    .kid-wrapper {
+      left: 55vw;
+      transform: scale(0.7);
+      transform-origin: bottom center;
+    }
+    /* the jump/bounce animations set `bottom`; scale must persist during them */
+    .kid-wrapper, .kid-wrapper.jumping {
+      transform: scale(0.7);
+    }
+    /* smaller poop */
+    .poop { font-size: 2rem; }
+    /* smaller title + score */
+    .label { font-size: 1.5rem; }
+    .score { font-size: 1.1rem; }
+  }
 </style>
 </head>
 <body>
@@ -644,10 +668,13 @@
   function checkCollision() {
     if (dead) return;
     const kidRect = getRect(wrapper);
+    const kidBody = getRect(wrapper.querySelector('.kid'));
+    // hitbox scales with the rendered kid (mobile shrinks it via CSS transform)
+    const scale = (kidBody.width || 80) / 80;   // 80px = kid's base width
     const kidHit = {
-      left:   kidRect.left + 15,
-      right:  kidRect.left + 65,
-      top:    kidRect.top  - 120,
+      left:   kidRect.left + 15 * scale,
+      right:  kidRect.left + 65 * scale,
+      top:    kidRect.top  - 120 * scale,
       bottom: kidRect.top
     };
     const dogRect = getRect(dog);
