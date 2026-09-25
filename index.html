@@ -491,9 +491,50 @@
     /* keep hint on one line on narrow screens */
     .hint { font-size: 0.9rem; letter-spacing: 0.03em; }
   }
+
+  /* Portrait lock — ask phone users to rotate back to upright */
+  .rotate-notice {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: linear-gradient(180deg, #87CEEB 0%, #228B22 100%);
+    color: #fff;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-family: sans-serif;
+    padding: 24px;
+  }
+  .rotate-notice .rot-emoji {
+    font-size: 4rem;
+    animation: rotHint 1.5s ease-in-out infinite;
+    margin-bottom: 16px;
+  }
+  .rotate-notice .rot-text {
+    font-size: 1.4rem;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    max-width: 320px;
+    line-height: 1.4;
+  }
+  @keyframes rotHint {
+    0%, 100% { transform: rotate(0deg); }
+    50%      { transform: rotate(-90deg); }
+  }
+  /* show only on short landscape screens (phones held sideways) */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .rotate-notice { display: flex; }
+  }
 </style>
 </head>
 <body>
+
+  <div class="rotate-notice">
+    <div class="rot-emoji">📱</div>
+    <div class="rot-text">Please turn your phone upright to play!</div>
+  </div>
 
   <div class="label">James and Harry Poop Runner</div>
   <div class="hint">SPACE or TAP to jump</div>
