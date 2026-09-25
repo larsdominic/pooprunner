@@ -808,8 +808,8 @@
     dogJumping = false;
     dog.classList.add('comforting');
     // sit just left of the kid so the snout reaches the face
-    // desktop: kr.left - 30 (proven). mobile: smaller dog → sit closer (smaller offset).
-    const offset = isMobile ? -10 : 30;
+    // desktop: kr.left - 30 (proven). mobile: smaller dog → sit further right to reach face.
+    const offset = isMobile ? -45 : 30;
     const targetLeft = kr.left - offset;
     dog.style.left = targetLeft + 'px';
     setTimeout(() => {
