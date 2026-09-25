@@ -474,7 +474,7 @@
     }
     /* shrink the kid and keep it anchored on the ground */
     .kid-wrapper {
-      left: 55vw;
+      left: 42vw;
       transform: scale(0.7);
       transform-origin: bottom center;
     }
@@ -556,6 +556,7 @@
   let collisionLoop;
   let spawnTimer;
   let poopId = 0;           // unique id per poop instance
+  const isMobile = window.matchMedia('(max-width: 600px)').matches;
 
   /* ---- Sound (Web Audio, no files needed) ---- */
   let audioCtx;
@@ -592,9 +593,15 @@
     if (dead) return;
     // Decide how many poops in this wave: mix of singles and clusters
     const r = Math.random();
-    const count = r < 0.45 ? 1 : (r < 0.8 ? 2 : 3);
+    // mobile: mostly singles, fewer big clusters
+    const count = isMobile
+      ? (r < 0.7 ? 1 : 2)
+      : (r < 0.45 ? 1 : (r < 0.8 ? 2 : 3));
     // one speed for the whole wave so cluster poops stay tightly packed (jumpable in one arc)
-    const dur = 1.6 + Math.random() * 2.6;  // 1.6s (fast) – 4.2s (slow)
+    // mobile: slower (easier to time the jump)
+    const dur = isMobile
+      ? 2.8 + Math.random() * 2.0   // 2.8s–4.8s
+      : 1.6 + Math.random() * 2.6;  // 1.6s–4.2s
     let maxTotal = 0;
     for (let i = 0; i < count; i++) {
       // tiny stagger keeps them touching — one jump clears the whole clump
@@ -603,7 +610,9 @@
       spawnOne(dur, delay);
     }
     // next wave after this one clears + a random gap (always land-able)
-    const gap = (maxTotal * 1000) + 700 + Math.random() * 1500; // 0.7s–2.2s extra
+    // mobile: bigger breathing room between waves
+    const extra = isMobile ? (1400 + Math.random() * 2000) : (700 + Math.random() * 1500);
+    const gap = (maxTotal * 1000) + extra;
     spawnTimer = setTimeout(launchPoop, gap);
   }
 
