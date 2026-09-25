@@ -859,6 +859,19 @@
   }
   loop();
   spawnTimer = setTimeout(launchPoop, 800);
+
+  // Pause spawning while the tab is hidden so timers don't pile up and burst on return
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      clearTimeout(spawnTimer);
+    } else if (!dead) {
+      // clear any in-flight poops that stacked up, then resume fresh
+      clearTimeout(spawnTimer);
+      activePoops.forEach(rec => rec.el.remove());
+      activePoops.length = 0;
+      spawnTimer = setTimeout(launchPoop, 600);
+    }
+  });
 </script>
 </body>
 </html>
