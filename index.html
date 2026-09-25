@@ -800,9 +800,9 @@
     dogJumping = false;
     dog.classList.add('comforting');
     // sit just left of the kid so the snout reaches the face
-    // (kr.left - 30 was perfect on desktop; scale the offset for mobile's smaller dog)
-    const dogScale = parseFloat(getComputedStyle(dog).getPropertyValue('--dog-scale')) || 1.6;
-    const targetLeft = kr.left - 30 * (dogScale / 1.6);
+    // desktop: kr.left - 30 (proven). mobile: smaller dog → sit closer (smaller offset).
+    const offset = isMobile ? -10 : 30;
+    const targetLeft = kr.left - offset;
     dog.style.left = targetLeft + 'px';
     setTimeout(() => {
       if (!dead) return;               // player may have restarted
