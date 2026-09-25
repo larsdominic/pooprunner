@@ -765,7 +765,6 @@
 
     // Find collision point (centre of kid body)
     const kr = getRect(wrapper);
-    const kidBodyRect = getRect(wrapper.querySelector('.kid'));
     const cx = (kr.left + kr.right) / 2;
     const cy = kr.top - 60;  // roughly mid-body
 
@@ -800,10 +799,10 @@
     dog.classList.remove('jumping');
     dogJumping = false;
     dog.classList.add('comforting');
-    // position the dog so its snout reaches the kid; measure real widths (mobile-safe)
-    const dogW = getRect(dog).width || 144;
-    const kidCenter = (kidBodyRect.left + kidBodyRect.right) / 2;
-    const targetLeft = kidCenter - dogW * 0.75;   // snout ends up at the kid's face
+    // sit just left of the kid so the snout reaches the face
+    // (kr.left - 30 was perfect on desktop; scale the offset for mobile's smaller dog)
+    const dogScale = parseFloat(getComputedStyle(dog).getPropertyValue('--dog-scale')) || 1.6;
+    const targetLeft = kr.left - 30 * (dogScale / 1.6);
     dog.style.left = targetLeft + 'px';
     setTimeout(() => {
       if (!dead) return;               // player may have restarted
