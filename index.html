@@ -596,9 +596,9 @@
     if (dead) return;
     // Decide how many poops in this wave: mix of singles and clusters
     const r = Math.random();
-    // mobile: mostly singles, fewer big clusters
+    // mobile: always single poops (clusters too hard to clear on small screen)
     const count = isMobile
-      ? (r < 0.7 ? 1 : 2)
+      ? 1
       : (r < 0.45 ? 1 : (r < 0.8 ? 2 : 3));
     // one speed for the whole wave so cluster poops stay tightly packed (jumpable in one arc)
     // mobile: slower (easier to time the jump)
