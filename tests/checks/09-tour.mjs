@@ -27,7 +27,7 @@ export default async t => {
   await place("11-splat", "16.5, 20.5, -Math.PI / 2", "__pr3d.place('small', 16.5, 19.9, { awake: true }), __pr3d.tick(0.2)");
   await place("12-king", "27.5, 12.5, -Math.PI / 2", "__pr3d.set({ stink: 0 }), __pr3d.clear('poops'), __pr3d.tick(0.1), __pr3d.view(27.5, 12.5, -Math.PI / 2), __pr3d.tick(1.6)");
   await t.eval("__pr3d.set({ win: true })"); await t.sleep(100); await shot(t, "13-win");
-  await t.eval("document.getElementById('ov-btn').click(), document.getElementById('skip-intro').click(), __pr3d.hold(true), __pr3d.set({ stink: 99 }), __pr3d.place('small', __pr3d.state.px, __pr3d.state.py - 0.6, { awake: true }), __pr3d.tick(0.3)");
+  await t.eval("document.getElementById('ov-btn').click(), __pr3d.hold(true), __pr3d.set({ stink: 99 }), __pr3d.place('small', __pr3d.state.px, __pr3d.state.py - 0.6, { awake: true }), __pr3d.tick(0.3)");
   await t.sleep(100); await shot(t, "14-lose");
 
   // 20 s of random play on the real loop
@@ -39,7 +39,7 @@ export default async t => {
     r = (r * 1103515245 + 12345) % 2147483648;
     const k = keys[r % keys.length];
     await t.key(k); await t.sleep(150 + (r % 400)); await t.key(k, false);
-    if ((await t.eval("__pr3d.state")).over) await t.eval("document.getElementById('ov-btn').click(); const s = document.getElementById('skip-intro'); if (!document.getElementById('intro').hidden) s.click()");
+    if ((await t.eval("__pr3d.state")).over) await t.eval("document.getElementById('ov-btn').click()");
   }
   t.assert(t.logs.filter(l => /^(EXCEPTION|error)/.test(l)).length === 0, "errors during play");
 };

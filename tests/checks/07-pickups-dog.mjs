@@ -21,13 +21,20 @@ export default async t => {
   s = await st();
   t.assert(s.kinds.tp === 1 && /by the gate/.test(s.msg), `safety net: tp ${s.kinds.tp}, msg "${s.msg}"`);
 
-  // The dog keeps up
+  // The dog keeps up, out in front where you can see it, a few steps away
+  const ahead = s => {
+    const ex = s.dog.x - s.px, ey = s.dog.y - s.py, d = Math.hypot(ex, ey);
+    return { d, cos: (ex * Math.cos(s.angle) + ey * Math.sin(s.angle)) / (d || 1) };
+  };
   await t.eval("__pr3d.clear('poops', 'tp'), __pr3d.view(16.5, 24.5, -Math.PI / 2)");
   await t.key("KeyW"); await t.eval("__pr3d.tick(2)"); await t.key("KeyW", false);
   await t.eval("__pr3d.tick(3)");
-  s = await st();
-  const dd = Math.hypot(s.dog.x - s.px, s.dog.y - s.py);
-  t.assert(dd < 3.5, "dog is " + dd.toFixed(1) + " away");
+  let a = ahead(await st());
+  t.assert(a.d > 2 && a.d < 5.5 && a.cos > 0.6, `dog not out in front: ${a.d.toFixed(1)} away, cos ${a.cos.toFixed(2)}`);
+  // Turn round: it runs back round in front
+  await t.eval("__pr3d.view(__pr3d.state.px, __pr3d.state.py, Math.PI / 2), __pr3d.tick(3)");
+  a = ahead(await st());
+  t.assert(a.d > 2 && a.d < 5.5 && a.cos > 0.6, `dog did not come round in front after a turn: ${a.d.toFixed(1)} away, cos ${a.cos.toFixed(2)}`);
 
   // ...and barks at poops
   await t.eval("__pr3d.place('small', __pr3d.state.dog.x + 2, __pr3d.state.dog.y), __pr3d.tick(1)");

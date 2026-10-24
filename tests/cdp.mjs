@@ -2,7 +2,7 @@
 import { spawn } from "node:child_process";
 import { writeFileSync, rmSync } from "node:fs";
 
-const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
+const CHROME = process.env.CHROME || "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 const VK = { Space: 32, KeyW: 87, KeyA: 65, KeyS: 83, KeyD: 68, KeyM: 77, KeyP: 80, KeyQ: 81, KeyE: 69,
   ArrowUp: 38, ArrowDown: 40, ArrowLeft: 37, ArrowRight: 39, Escape: 27 };
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -65,8 +65,6 @@ export async function withPage({ url, w = 640, h = 400, touch = false, init = ""
           const p = document.getElementById("pick-${kid}"); if (p) p.click();
           const e = document.getElementById("easy"); if (e && e.checked !== ${easy}) e.click();
           document.getElementById("ov-btn").click();
-          const skip = document.getElementById("skip-intro");
-          if (skip && !document.getElementById("intro").hidden) skip.click();   // checks start straight in 3D
           if (__pr3d.hold) __pr3d.hold(true);   // only tick() moves the game, so checks are repeatable
         })()`);
         await sleep(50);

@@ -32,7 +32,6 @@ export default async (t, o) => {
 
   // Review Focus 2: Play again resets everything
   await t.eval("document.getElementById('ov-btn').click()");
-  if (await t.eval("!!document.getElementById('skip-intro')")) await t.eval("document.getElementById('skip-intro').click()");
   await t.eval("__pr3d.hold(true)");
   s = await st();
   const want = { stink: 0, rolls: 30, poopsLeft: 18, king: null, flowers: 0, splat: 0, over: null, msg: "" };

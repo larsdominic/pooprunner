@@ -37,7 +37,7 @@ export default async (t, o) => {
 
   // The end screen lets you switch kid and Easy for the next game
   for (const id of ["pick-harry", "easy"]) t.assert(!(await t.eval(`document.getElementById("${id}").closest("[hidden]") !== null`)), id + " hidden on the win screen");
-  await t.eval("document.getElementById('pick-harry').click(), document.getElementById('easy').click(), document.getElementById('ov-btn').click(), document.getElementById('skip-intro').click(), __pr3d.hold(true)");
+  await t.eval("document.getElementById('pick-harry').click(), document.getElementById('easy').click(), document.getElementById('ov-btn').click(), __pr3d.hold(true)");
   let s = await st();
   t.assert(s.kid === "harry" && s.easy === true, `next game: kid ${s.kid}, easy ${s.easy}`);
 

@@ -283,124 +283,12 @@
     .stat b { font-size: 1.15rem; }
     .stat span { font-size: 9px; }
   }
-
-  /* ===== 2D intro: the original Poop Runner (pooprunner.lol), inside the game frame =====
-     Sizes scale with --k (set from the frame height) so the kid, dog and jump fit a landscape frame. */
-  #intro {
-    position: absolute; inset: 0; overflow: hidden; z-index: 2;
-    --ground: 26%; --k: 0.6;
-    background: linear-gradient(180deg, #87CEEB 0%, #87CEEB 74%, #90EE90 74%, #228B22 100%);
-    font-family: sans-serif;
-    transform-origin: 50% 74%;
-    cursor: pointer;
-  }
-  #intro.morphing { transition: transform 1.3s ease-in-out, opacity .6s ease-in .75s; transform: perspective(500px) rotateX(82deg) scale(2.2); opacity: 0; }
-  #intro.frozen, #intro.frozen * { animation-play-state: paused !important; }
-  #intro .skip {
-    position: absolute; top: 10px; right: 10px; z-index: 20;
-    font: 800 13px/1 var(--ui); color: #fff; background: rgb(0 0 0 / .28);
-    border: 2px solid #fff; border-radius: 999px; padding: 8px 14px; cursor: pointer;
-  }
-  #intro .label {
-    position: absolute; top: 12%; left: 50%; transform: translateX(-50%);
-    font-size: calc(2rem * var(--k) + 6px); font-weight: bold; color: #fff;
-    text-shadow: 2px 2px 4px rgba(0,0,0,.5); white-space: nowrap; animation: pr-wobble 1s ease-in-out infinite; z-index: 10;
-  }
-  @keyframes pr-wobble { 0%, 100% { transform: translateX(-50%) rotate(-2deg); } 50% { transform: translateX(-50%) rotate(2deg); } }
-  #intro .hint2 {
-    position: absolute; bottom: 6%; left: 50%; transform: translateX(-50%); font-size: .95rem; color: rgba(255,255,255,.9);
-    text-shadow: 1px 1px 3px rgba(0,0,0,.4); letter-spacing: .08em; pointer-events: none; white-space: nowrap;
-  }
-  #intro .cloud { position: absolute; background: #fff; border-radius: 50px; opacity: .9; }
-  #intro .cloud::before, #intro .cloud::after { content: ''; position: absolute; background: #fff; border-radius: 50%; }
-  #intro .cloud1 { width: 120px; height: 40px; top: 18%; animation: pr-cloud 18s linear infinite; }
-  #intro .cloud1::before { width: 60px; height: 60px; top: -30px; left: 15px; }
-  #intro .cloud1::after { width: 40px; height: 40px; top: -20px; left: 60px; }
-  #intro .cloud2 { width: 90px; height: 30px; top: 32%; animation: pr-cloud 25s linear infinite; animation-delay: -10s; }
-  #intro .cloud2::before { width: 45px; height: 45px; top: -22px; left: 10px; }
-  #intro .cloud2::after { width: 30px; height: 30px; top: -14px; left: 45px; }
-  @keyframes pr-cloud { from { left: -200px; } to { left: 110%; } }
-  #intro .sun {
-    position: absolute; top: 8%; right: 12%; width: 54px; height: 54px; background: #FFD700; border-radius: 50%;
-    box-shadow: 0 0 30px #FFD700, 0 0 60px rgba(255,215,0,.4); animation: pr-pulse 2s ease-in-out infinite;
-  }
-  @keyframes pr-pulse { 0%, 100% { box-shadow: 0 0 30px #FFD700, 0 0 60px rgba(255,215,0,.4); } 50% { box-shadow: 0 0 50px #FFD700, 0 0 90px rgba(255,215,0,.6); } }
-  #intro .ground-line { position: absolute; bottom: var(--ground); width: 100%; height: 3px; background: rgba(0,0,0,.1); }
-
-  #intro .kid-wrapper { position: absolute; bottom: var(--ground); left: 34%; animation: pr-bounce .12s ease-in-out infinite alternate; }
-  #intro .kid-wrapper.jumping { animation: pr-jump .6s ease-out forwards; }
-  @keyframes pr-bounce { from { bottom: var(--ground); } to { bottom: calc(var(--ground) + 6px * var(--k)); } }
-  @keyframes pr-jump { 0% { bottom: var(--ground); } 40% { bottom: calc(var(--ground) + 160px * var(--k)); } 100% { bottom: var(--ground); } }
-  #intro .kid-wrapper.jumping .leg-left, #intro .kid-wrapper.jumping .leg-right { animation: none; transform: rotate(0deg); }
-  #intro .kid-wrapper.jumping .arm-left, #intro .kid-wrapper.jumping .arm-right { animation: none; transform: rotate(-80deg); }
-  #intro .kid { width: 80px; height: 0; position: relative; transform: scale(var(--k)); transform-origin: bottom left; }
-  #intro .cry { position: absolute; bottom: 82px; left: 50%; transform: translateX(-50%); font-size: 3.5rem; line-height: 1; display: none; z-index: 10; }
-  #intro .crying .cry { display: block; }
-  #intro .crying .head img { opacity: 0; }
-  #intro .leg-left, #intro .leg-right { position: absolute; width: 16px; height: 46px; bottom: 0; transform-origin: top center; }
-  #intro .leg-left { left: 16px; animation: pr-legL .1s ease-in-out infinite alternate; }
-  #intro .leg-right { left: 48px; animation: pr-legR .1s ease-in-out infinite alternate; }
-  @keyframes pr-legL { from { transform: rotate(-40deg); } to { transform: rotate(35deg); } }
-  @keyframes pr-legR { from { transform: rotate(35deg); } to { transform: rotate(-40deg); } }
-  #intro .leg-left::before, #intro .leg-right::before { content: ''; position: absolute; top: 0; left: 0; width: 16px; height: 36px; background: #4169E1; border-radius: 8px 8px 4px 4px; }
-  #intro .leg-left::after, #intro .leg-right::after { content: ''; position: absolute; bottom: 0; left: -3px; width: 22px; height: 10px; background: #8B0000; border-radius: 4px 6px 4px 2px; }
-  #intro .torso { position: absolute; bottom: 44px; left: 18px; width: 44px; height: 34px; background: #FF6B35; border-radius: 6px 6px 4px 4px; }
-  #intro .arm-left, #intro .arm-right { position: absolute; width: 14px; height: 32px; background: #FF6B35; border-radius: 7px; bottom: 42px; transform-origin: top center; }
-  #intro .arm-left { left: 8px; animation: pr-armL .1s ease-in-out infinite alternate; }
-  #intro .arm-right { left: 58px; animation: pr-armR .1s ease-in-out infinite alternate; }
-  @keyframes pr-armL { from { transform: rotate(-60deg); } to { transform: rotate(30deg); } }
-  @keyframes pr-armR { from { transform: rotate(30deg); } to { transform: rotate(-60deg); } }
-  #intro .head { position: absolute; bottom: 82px; left: 50%; transform: translateX(-50%); width: 110px; height: 110px; animation: pr-bobble .12s ease-in-out infinite alternate; transform-origin: bottom center; }
-  #intro .head img { width: 100%; height: 100%; object-fit: contain; object-position: center bottom; }
-  @keyframes pr-bobble { from { transform: translateX(-50%) rotate(-8deg) scaleY(1.04); } to { transform: translateX(-50%) rotate(8deg) scaleY(.96); } }
-
-  #intro .dog { position: absolute; bottom: var(--ground); left: 6%; width: 90px; height: 0; transform-origin: bottom left; animation: pr-dogBob .12s ease-in-out infinite alternate, pr-dogLunge .5s ease-in-out infinite; z-index: 3; }
-  @keyframes pr-dogBob { from { bottom: var(--ground); } to { bottom: calc(var(--ground) + 10px * var(--k)); } }
-  @keyframes pr-dogLunge { 0%, 100% { transform: scale(calc(1.6 * var(--k))) translateX(0) rotate(0); } 50% { transform: scale(calc(1.6 * var(--k))) translateX(14px) rotate(3deg); } }
-  #intro .dog .body { position: absolute; bottom: 20px; left: 8px; width: 62px; height: 30px; background: #2b2b2b; border-radius: 16px 20px 12px 12px; }
-  #intro .dog .body::after { content: ''; position: absolute; bottom: -2px; left: 6px; width: 40px; height: 16px; background: #f5f5f5; border-radius: 12px; }
-  #intro .dog .head-d { position: absolute; bottom: 34px; left: 56px; width: 30px; height: 26px; background: #2b2b2b; border-radius: 14px 16px 10px 12px; }
-  #intro .dog .head-d::after { content: ''; position: absolute; top: 4px; left: 11px; width: 8px; height: 18px; background: #f5f5f5; border-radius: 6px; }
-  #intro .dog .snout { position: absolute; bottom: 34px; left: 82px; width: 14px; height: 12px; background: #2b2b2b; border-radius: 6px 8px 8px 6px; }
-  #intro .dog .snout::after { content: ''; position: absolute; top: 2px; right: 0; width: 5px; height: 5px; background: #111; border-radius: 50%; }
-  #intro .dog .ear { position: absolute; bottom: 56px; left: 60px; width: 12px; height: 14px; background: #2b2b2b; border-radius: 6px 6px 0 0; transform: rotate(-10deg); }
-  #intro .dog .tail { position: absolute; bottom: 30px; left: -6px; width: 22px; height: 10px; background: #2b2b2b; border-radius: 8px; transform-origin: right center; animation: pr-tail .08s ease-in-out infinite alternate; }
-  #intro .dog .tail::after { content: ''; position: absolute; left: 0; top: -2px; width: 10px; height: 12px; background: #f5f5f5; border-radius: 6px; }
-  @keyframes pr-tail { from { transform: rotate(-30deg); } to { transform: rotate(35deg); } }
-  #intro .dog .dleg { position: absolute; bottom: 0; width: 8px; height: 22px; background: #2b2b2b; border-radius: 4px; transform-origin: top center; }
-  #intro .dog .dleg-fl { left: 60px; animation: pr-dlegA .1s ease-in-out infinite alternate; }
-  #intro .dog .dleg-fr { left: 50px; animation: pr-dlegB .1s ease-in-out infinite alternate; }
-  #intro .dog .dleg-bl { left: 20px; animation: pr-dlegB .1s ease-in-out infinite alternate; }
-  #intro .dog .dleg-br { left: 10px; animation: pr-dlegA .1s ease-in-out infinite alternate; }
-  @keyframes pr-dlegA { from { transform: rotate(-55deg); } to { transform: rotate(50deg); } }
-  @keyframes pr-dlegB { from { transform: rotate(50deg); } to { transform: rotate(-55deg); } }
-
-  #intro .poop { position: absolute; bottom: calc(var(--ground) - 4px); font-size: calc(2.8rem * var(--k) + 8px); line-height: 1; left: 110%; user-select: none; z-index: 4; }
-  #intro .poop::after { content: '🪰'; position: absolute; font-size: .4em; top: -14px; left: 50%; animation: pr-fly .5s ease-in-out infinite alternate; }
-  @keyframes pr-fly { from { transform: translateX(-8px); } to { transform: translateX(8px) translateY(-6px); } }
-  #intro .splat { position: absolute; width: 14px; height: 14px; border-radius: 50%; background: #6b3f17; z-index: 6; transition: transform .5s ease-out, opacity .5s ease-in .4s; }
 </style>
 </head>
 <body>
 <div class="stage" id="stage">
   <canvas id="view" aria-label="Game view"></canvas>
   <div class="crosshair" aria-hidden="true"></div>
-  <!-- 2D intro: the original Poop Runner; jumping the first poop morphs it into the 3D park -->
-  <div id="intro" hidden>
-    <div class="sun"></div><div class="cloud cloud1"></div><div class="cloud cloud2"></div>
-    <div class="label">James and Harry Poop Runner</div>
-    <div class="ground-line"></div>
-    <div class="dog"><div class="tail"></div><div class="body"></div><div class="dleg dleg-bl"></div><div class="dleg dleg-br"></div>
-      <div class="dleg dleg-fl"></div><div class="dleg dleg-fr"></div><div class="head-d"></div><div class="ear"></div><div class="snout"></div></div>
-    <div class="kid-wrapper"><div class="kid">
-      <div class="head"><img id="intro-face" alt=""></div>
-      <div class="torso"></div><div class="arm-left"></div><div class="arm-right"></div><div class="leg-left"></div><div class="leg-right"></div>
-      <div class="cry">😭</div>
-    </div></div>
-    <div class="poop" id="intro-poop">💩</div>
-    <div class="hint2" id="intro-hint">SPACE or TAP to jump</div>
-    <button class="skip" id="skip-intro" type="button">Skip ›</button>
-  </div>
   <div class="touch-ui" id="touch-ui" hidden>
     <div class="joy" id="joy" hidden><i id="knob"></i></div>
     <button class="fire-btn" id="fire-btn" type="button">Throw</button>
@@ -510,7 +398,6 @@
   // Where things start. Poops and pickups sit on cell centres.
   const START = [3.5, 29.5, -Math.PI / 2];
   const KING_SPAWN = [27.5, 6.5];
-  const MORPH_POOP = [12, 28];   // after the 2D intro, this poop is the one you just jumped, waiting in front of you
   const POOPS = [
     ["small", 2, 7], ["small", 8, 1], ["small", 22, 28], ["small", 29, 24], ["small", 16, 6], ["small", 20, 7],
     ["small", 14, 16], ["small", 9, 19], ["small", 18, 26], ["small", 28, 19], ["small", 12, 28], ["small", 29, 9],
@@ -959,9 +846,9 @@
     easy = $("easy").checked;
     over = null;
     sprites = PROPS.map(([kind, x, y]) => ({ kind, x: x + 0.5, y: y + 0.5, z: 0, tex: ART.sprites[kind], solid: SOLID_PROPS[kind] }));
-    for (const [kind, x, y] of POOPS) spawnPoop(kind, x + 0.5, y + 0.5).morph = x === MORPH_POOP[0] && y === MORPH_POOP[1];
+    for (const [kind, x, y] of POOPS) spawnPoop(kind, x + 0.5, y + 0.5);
     for (const [kind, x, y] of PICKUPS) spawnPickup(kind, x + 0.5, y + 0.5);
-    dog = { kind: "dog", model: "dog", x: START[0], y: START[1] + 1, z: 0, anim: 0, heading: START[2], moving: false, stuck: 0, barkT: 4 };
+    dog = { kind: "dog", model: "dog", x: START[0], y: START[1] - 3, z: 0, anim: 0, heading: START[2], moving: false, stuck: 0, barkT: 4 };
     sprites.push(dog);
     setMsg("");
   }
@@ -1096,7 +983,7 @@
 
   // World-space ellipsoids for this frame: centre, and the three axes divided by the radii
   function modelParts(s) {
-    const m = MODELS[s.model], k = m.scale * (s.grow ?? 1), sq = s.sq || 1, h = 1 / Math.sqrt(sq);
+    const m = MODELS[s.model], k = m.scale, sq = s.sq || 1, h = 1 / Math.sqrt(sq);
     const fa = s.heading ?? Math.atan2(py - s.y, px - s.x), fx = Math.cos(fa), fy = Math.sin(fa), rx = fy, ry = -fx;
     const parts = (typeof m.parts === "function" ? m.parts(s) : m.parts).map(([x, y, z, a, b, c, col, shine, roll = 0]) => {
       const cr = Math.cos(roll), sr = Math.sin(roll);
@@ -1117,7 +1004,7 @@
 
   const MB = { O: new Float64Array(256), D: new Float64Array(192), box: new Float64Array(256), act: new Int32Array(64) };   // reused per model
   function renderModel(s) {
-    const m = MODELS[s.model], k = m.scale * (s.grow ?? 1), sx = s.x - px, sy = s.y - py;
+    const m = MODELS[s.model], k = m.scale, sx = s.x - px, sy = s.y - py;
     const invDet = 1 / (plx * dy - dx * ply);
     const tX = invDet * (dy * sx - dx * sy), tY = invDet * (-ply * sx + plx * sy);
     const rad = m.rad * k + 0.05, zc = s.z + m.zc * k;   // bounding sphere
@@ -1360,15 +1247,22 @@
   }
 
   // ---------- The dog ----------
-  // Trots after you (behind and a bit to the left), wanders when close, barks at poops
+  // Runs around out in front of you, so you can see it: weaves side to side a few steps ahead, barks at poops
+  const DOG_AHEAD = 4, DOG_WEAVE = 1.6;
   function updateDog(g, dt) {
     g.anim += dt; g.barkT += dt;
-    const lx = -plx / PLANE, ly = -ply / PLANE;
-    const tx = px - dx * 1.8 + lx * 0.8, ty = py - dy * 1.8 + ly * 0.8;
+    const lx = -plx / PLANE, ly = -ply / PLANE, weave = Math.sin(g.anim * 1.3) * DOG_WEAVE;
+    // Aim a few steps ahead, where you can see it; if a wall or the pond is in the way, come in closer
+    let tx = px + dx * 1.5, ty = py + dy * 1.5;
+    for (const a of [DOG_AHEAD, 3, 2]) {
+      const cx = px + dx * a + lx * weave, cy = py + dy * a + ly * weave;
+      if (canStand(cx, cy, 0.2) && los(px, py, cx, cy)) { tx = cx; ty = cy; break; }
+    }
     const dT = Math.hypot(tx - g.x, ty - g.y), dP = Math.hypot(px - g.x, py - g.y);
     g.moving = false;
-    if (dT > 0.6) {
-      const v = (dT > 2.5 ? 3.8 : 1.2) * dt, ux = (tx - g.x) / dT, uy = (ty - g.y) / dT;
+    if (dT > 0.4) {
+      // Sprints to get round in front when you turn, trots while weaving
+      const v = (dT > 2.5 ? 6 : 2.4) * dt, ux = (tx - g.x) / dT, uy = (ty - g.y) / dT;
       const ox = g.x, oy = g.y;
       if (canStand(g.x + ux * v, g.y, 0.2) && !blockedBySprite(g.x + ux * v, g.y, g)) g.x += ux * v;
       if (canStand(g.x, g.y + uy * v, 0.2) && !blockedBySprite(g.x, g.y + uy * v, g)) g.y += uy * v;
@@ -1377,8 +1271,8 @@
       g.stuck = g.moving ? 0 : g.stuck + dt;
     } else { g.stuck = 0; g.heading = Math.atan2(py - g.y, px - g.x); }
     if (g.stuck > 3 || dP > 12) {
-      // Lost: pop back in behind the player
-      for (const [ox, oy] of [[tx, ty], [px - dx, py - dy], [px + lx, py + ly], [px - lx, py - ly], [px + dx, py + dy]])
+      // Lost: pop back in out in front of the player (behind only if there's no room ahead)
+      for (const [ox, oy] of [[tx, ty], [px + dx * 2, py + dy * 2], [px + dx, py + dy], [px + lx, py + ly], [px - lx, py - ly], [px - dx, py - dy]])
         if (canStand(ox, oy, 0.2)) { g.x = ox; g.y = oy; g.stuck = 0; break; }
     }
     if (g.barkT >= 4 && sprites.some(p => POOP[p.kind] && !p.gone && (p.x - g.x) ** 2 + (p.y - g.y) ** 2 < 16)) {
@@ -1424,7 +1318,6 @@
   }
 
   function updatePoop(p, dt) {
-    if (p.frozen) return;
     const def = POOP[p.kind], ex = px - p.x, ey = py - p.y, d = Math.hypot(ex, ey) || 0.001;
     p.anim += dt; p.cool -= dt; p.flash -= dt;
     if (!p.awake && d < 10 && los(p.x, p.y, px, py)) p.awake = true;
@@ -1615,15 +1508,12 @@
     running = false; trigger = false; keys.clear();
     showOverlay("Paused", "Pooprunner 3D", `${POOPS.length - poopsLeft()} of ${POOPS.length} poops cleaned · stink ${Math.round(stink)}% · ${rolls} rolls`, "Resume");
   }
-  // A fresh game (from the title, or Play again after a win) opens with the 2D intro; Try again goes straight in
   function start() {
     if (!ready) return;
     audio();
-    const withIntro = !started || over === "win";
     if (!started || over) init();
     started = true;
     overlay.hidden = true;
-    if (withIntro) { beginIntro(); return; }
     play();
     lockPointer();
   }
@@ -1631,91 +1521,6 @@
     phase = "play"; running = true;
     $("touch-ui").hidden = !coarse;
   }
-
-  // ---------- 2D intro → 3D morph ----------
-  const introEl = $("intro"), introPoop = $("intro-poop"), introKid = introEl.querySelector(".kid-wrapper");
-  const intro = { x: 0, speed: 0, k: 1, jumpT: 0, hitT: 0, morphT: 0, gap: 0 };
-  function beginIntro() {
-    phase = "intro"; running = false;
-    $("touch-ui").hidden = true;
-    $("intro-face").src = FACES[kid].img.src;
-    introEl.classList.remove("frozen", "morphing");
-    introKid.classList.remove("jumping", "crying");
-    introEl.querySelectorAll(".splat").forEach(e => e.remove());
-    introEl.hidden = false;
-    const r = introEl.getBoundingClientRect();
-    intro.k = Math.max(0.35, Math.min(1, 0.72 * r.height / 360));
-    introEl.style.setProperty("--k", intro.k);
-    intro.x = r.width + 30; intro.speed = r.width / 2.4; intro.jumpT = intro.hitT = 0;
-  }
-  function introJump() {
-    if (phase !== "intro" || intro.jumpT > 0 || intro.hitT > 0) return;
-    intro.jumpT = 0.6;
-    introKid.classList.add("jumping");
-    tone(300, 700, 0.18, "square", 0.08);
-  }
-  function introLoop(dt) {
-    const r = introEl.getBoundingClientRect(), k = intro.k;
-    const kidLeft = r.width * 0.34, kidMid = kidLeft + 40 * k, pw = introPoop.offsetWidth;
-    if (intro.jumpT > 0 && (intro.jumpT -= dt) <= 0) introKid.classList.remove("jumping");
-    if (intro.hitT > 0) {
-      // After a splat the poop comes round again
-      if ((intro.hitT -= dt) <= 0) {
-        introKid.classList.remove("crying");
-        introEl.querySelectorAll(".splat").forEach(e => e.remove());
-        intro.x = r.width + 30;
-      }
-    } else {
-      intro.x -= intro.speed * dt;
-      const mid = intro.x + pw / 2, feetHit = intro.x < kidLeft + 65 * k && intro.x + pw > kidLeft + 15 * k;
-      if (intro.jumpT > 0 && mid < kidMid) return startMorph();
-      if (feetHit && intro.jumpT <= 0) {
-        intro.hitT = 1.2;
-        introKid.classList.add("crying");
-        sfxSquelch();
-        for (let i = 0; i < 9; i++) {
-          const d = document.createElement("div"), a = -Math.PI * (0.1 + 0.8 * i / 8);
-          d.className = "splat";
-          d.style.left = `${kidMid}px`; d.style.bottom = `calc(var(--ground) + ${10 * k}px)`;
-          introEl.appendChild(d);
-          requestAnimationFrame(() => requestAnimationFrame(() => { d.style.transform = `translate(${Math.cos(a) * 60 * k}px, ${Math.sin(a) * 50 * k}px)`; d.style.opacity = "0"; }));
-        }
-      }
-      if (intro.x < -pw - 20) intro.x = r.width + 30;
-    }
-    intro.gap = intro.x + pw / 2 - kidMid;
-    introPoop.style.left = `${intro.x}px`;
-  }
-  function startMorph() {
-    phase = "morph"; intro.morphT = 0;
-    introEl.classList.add("frozen");
-    void introEl.offsetWidth;
-    introEl.classList.add("morphing");
-    // The jumped poop is waiting in the park, flat at first, then puffs up into 3D
-    const p = sprites.find(s => s.morph && !s.gone);
-    if (p) { p.x = START[0]; p.y = START[1] - 4; p.frozen = true; p.grow = 0.1; p.awake = false; }
-    dog.x = START[0] - 0.7; dog.y = START[1] + 0.8;
-    cv.style.transition = "none"; cv.style.transform = "scale(1.9)";
-    void cv.offsetWidth;
-    cv.style.transition = "transform 1.6s cubic-bezier(.2,.7,.2,1)"; cv.style.transform = "scale(1)";
-    tone(200, 900, 0.5, "triangle", 0.1);
-  }
-  function morphLoop(dt) {
-    intro.morphT += dt;
-    const p = sprites.find(s => s.morph && !s.gone), t = Math.min(1, Math.max(0, (intro.morphT - 0.7) / 1.1));
-    if (p) p.grow = 0.1 + 0.9 * (1 + 2.7 * (t - 1) ** 3 + 1.7 * (t - 1) ** 2);   // ease out with a little bounce
-    if (intro.morphT >= 2.2) finishIntro();
-  }
-  function finishIntro() {
-    introEl.hidden = true;
-    introEl.classList.remove("frozen", "morphing");
-    cv.style.transition = ""; cv.style.transform = "";
-    const p = sprites.find(s => s.morph && !s.gone && s.frozen);
-    if (p) { p.frozen = false; p.grow = 1; p.awake = true; p.cool = 0.8; }
-    play();
-  }
-  $("skip-intro").addEventListener("click", e => { e.stopPropagation(); finishIntro(); });
-  introEl.addEventListener("pointerdown", e => { if (!e.target.closest("button")) { e.preventDefault(); introJump(); } });
   $("ov-btn").addEventListener("click", start);
 
   // ---------- Input ----------
@@ -1735,7 +1540,6 @@
   addEventListener("keydown", e => {
     // A held or mashed key (Space for auto-throw) must not click straight through the win / lose / pause screen
     if (!running && phase === "play" && (e.repeat || performance.now() - overlayAt < 600) && (e.code === "Space" || e.code === "Enter")) { e.preventDefault(); return; }
-    if (phase === "intro" && (e.code === "Space" || e.code === "ArrowUp")) { e.preventDefault(); introJump(); return; }
     if (running && ["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) e.preventDefault();
     if (e.code === "KeyM") showMap = !showMap;
     if (e.code === "KeyP" || e.code === "Escape") { if (running) pause(); return; }
@@ -1855,8 +1659,6 @@
   function frame(now) {
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
-    if (phase === "intro") introLoop(dt);
-    else if (phase === "morph") morphLoop(dt);
     if (ready && !hold) {
       if (running) update(dt);
       else if (!started) rotate(dt * 0.12); // slow pan behind the title screen
@@ -1874,13 +1676,12 @@
       const kinds = Object.fromEntries(["roll", "tail", "puff", "small", "big", "cloud", "poof", "flowers", "king", "tp", "fresh", "dog"].map(k => [k, 0]));
       for (const s of sprites) kinds[s.kind] = (kinds[s.kind] || 0) + 1;
       const k = sprites.find(s => s.kind === "king" && !s.gone);
-      return { ready, running, over, kid, phase, introGap: intro.gap, px, py, angle: Math.atan2(dy, dx), rolls, stink, splat, easy, poopsLeft: poopsLeft(), flowers: kinds.flowers, kinds, msg: hud.msg.textContent,
+      return { ready, running, over, kid, phase, px, py, angle: Math.atan2(dy, dx), rolls, stink, splat, easy, poopsLeft: poopsLeft(), flowers: kinds.flowers, kinds, msg: hud.msg.textContent,
         king: k ? { hp: k.hp, x: k.x, y: k.y } : null, dog: dog && { x: dog.x, y: dog.y }, barkT: dog && dog.barkT,
         props: sprites.filter(s => PROPS.some(p => p[0] === s.kind)).length };
     },
     find: kind => sprites.filter(s => s.kind === kind).map(({ x, y, z }) => ({ x, y, z })),
     set(o) { if ("rolls" in o) rolls = o.rolls; if ("stink" in o) stink = o.stink; if (o.win) end("win"); },
-    introJump: () => introJump(),
     place(kind, x, y, o = {}) {
       if (POOP[kind]) spawnPoop(kind, x, y, !!o.awake);
       else if (kind === "tp" || kind === "fresh") spawnPickup(kind, x, y);
