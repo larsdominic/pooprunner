@@ -1017,8 +1017,9 @@
   ];
   const BROWS = [[-0.07, 0.15, 0.29, 0.05, 0.02, 0.014, DARK, 0.1, 0.45], [0.07, 0.15, 0.29, 0.05, 0.02, 0.014, DARK, 0.1, -0.45]];
   const CROWN = [
-    [0, 0, 0.405, 0.085, 0.085, 0.024, GOLD, 0.7], [0, 0.085, 0.405, 0.016, 0.01, 0.016, RED, 0.8], [0, -0.13, 0.2, 0.2, 0.06, 0.17, RED, 0.15],
-    ...[0, 1, 2, 3, 4].map(i => [Math.cos(i * 1.2566) * 0.07, Math.sin(i * 1.2566) * 0.07, 0.44, 0.02, 0.02, 0.026, GOLD, 0.7]),
+    [0, 0, 0.41, 0.12, 0.12, 0.032, GOLD, 0.7], [0, 0.12, 0.41, 0.022, 0.012, 0.022, RED, 0.8], [0, -0.13, 0.2, 0.2, 0.06, 0.17, RED, 0.15],
+    // five points, one at the front (+y faces you) and the rest mirrored left and right, so it sits straight
+    ...[0, 1, 2, 3, 4].map(i => [Math.cos(Math.PI / 2 + i * 1.2566) * 0.1, Math.sin(Math.PI / 2 + i * 1.2566) * 0.1, 0.455, 0.028, 0.028, 0.036, GOLD, 0.7]),
   ];
   // The border collie, built each frame so the legs can trot and the tail wag (+y = the way it's facing)
   const FUR = [34, 32, 34], FUR_W = [240, 238, 232], PINK = [240, 120, 140];
