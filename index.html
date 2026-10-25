@@ -683,22 +683,80 @@
       g.fillRect(-4, -2.5, 8, 5); g.restore();
     }
   }
-  // The toy blaster at the bottom of the screen, built at screen scale (G pixels per 640-wide pixel)
+  // The toy blaster at the bottom of the screen, built at screen scale (G pixels per 640-wide pixel).
+  // Lit from the upper left like the park: gradients round off the barrel and roll, the body has a top face
+  // and a side for thickness, and soft shadows sit where the parts meet.
   function drawBlaster(G) {
     const c = canvas(Math.round(200 * G), Math.round(140 * G)), g = c.getContext("2d");
     g.scale(G, G);
-    g.fillStyle = "#2f6fd0"; g.beginPath(); g.moveTo(22, 140); g.lineTo(178, 140); g.lineTo(152, 74); g.lineTo(48, 74); g.fill();
-    g.fillStyle = "#4a8ae6"; g.beginPath(); g.moveTo(48, 74); g.lineTo(152, 74); g.lineTo(158, 90); g.lineTo(42, 90); g.fill();
-    g.fillStyle = "#f08a24"; g.beginPath(); g.moveTo(66, 92); g.lineTo(134, 92); g.lineTo(116, 18); g.lineTo(84, 18); g.fill();
-    g.fillStyle = "#ffb04a"; g.beginPath(); g.moveTo(66, 92); g.lineTo(84, 92); g.lineTo(92, 18); g.lineTo(84, 18); g.fill();
-    g.fillStyle = "#ffd23a"; g.fillRect(74, 52, 52, 7);
-    blob(g, 100, 18, 17, 6.5, "#d06a14"); blob(g, 100, 18, 11, 4, "#5a2a08");
-    // Spare roll in the hopper on the left, so it reads as a TP blaster
-    g.fillStyle = "#e6e4da"; g.fillRect(14, 52, 40, 54);
-    g.fillStyle = "#fbfbf6"; g.fillRect(14, 50, 34, 54);
-    blob(g, 34, 50, 20, 7, "#fbfbf6"); blob(g, 34, 50, 7, 3, "#b98a52");
-    g.fillStyle = "#c9c9be"; for (let y = 60; y < 104; y += 5) g.fillRect(40, y, 2, 2);
-    g.fillStyle = "#1f4fa0"; g.fillRect(150, 104, 18, 36);
+    const poly = pts => { g.beginPath(); pts.forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.closePath(); };
+    const lin = (x0, y0, x1, y1, stops) => { const gr = g.createLinearGradient(x0, y0, x1, y1); stops.forEach(([o, col]) => gr.addColorStop(o, col)); return gr; };
+    const soft = (x, y, rx, ry, a) => {   // soft round shadow
+      const gr = g.createRadialGradient(0, 0, 0, 0, 0, 1);
+      gr.addColorStop(0, `rgba(10,20,50,${a})`); gr.addColorStop(1, "rgba(10,20,50,0)");
+      g.save(); g.translate(x, y); g.scale(rx, ry); g.fillStyle = gr; g.beginPath(); g.arc(0, 0, 1, 0, Math.PI * 2); g.fill(); g.restore();
+    };
+
+    // Body: right side (thickness), front face, then the top face with a bright front edge
+    g.fillStyle = lin(152, 0, 190, 0, [[0, "#1d4f9e"], [1, "#143a78"]]);
+    poly([[152, 74], [164, 76], [190, 140], [178, 140]]); g.fill();
+    g.fillStyle = lin(22, 0, 178, 0, [[0, "#5d9cf0"], [0.35, "#3c7fe0"], [0.8, "#2c66c4"], [1, "#2459ad"]]);
+    poly([[22, 140], [178, 140], [158, 90], [42, 90]]); g.fill();
+    g.fillStyle = lin(0, 100, 0, 140, [[0, "rgba(0,0,0,0)"], [1, "rgba(5,20,60,.28)"]]);
+    poly([[22, 140], [178, 140], [158, 90], [42, 90]]); g.fill();
+    g.fillStyle = lin(48, 74, 160, 90, [[0, "#8cc0ff"], [0.6, "#68a6f6"], [1, "#4c8be6"]]);
+    poly([[48, 74], [152, 74], [158, 90], [42, 90]]); g.fill();
+    g.fillStyle = "rgba(255,255,255,.55)"; poly([[42, 89], [158, 89], [159, 91.5], [41, 91.5]]); g.fill();
+    g.fillStyle = "rgba(255,255,255,.35)"; poly([[22, 140], [42, 91.5], [45, 91.5], [26, 140]]); g.fill();
+    // Two screws on the front face
+    for (const x of [62, 138]) {
+      g.fillStyle = "#1c4a96"; g.beginPath(); g.arc(x, 118, 4.2, 0, Math.PI * 2); g.fill();
+      g.fillStyle = "#9cc8ff"; g.beginPath(); g.arc(x - 1, 117, 2.6, 0, Math.PI * 2); g.fill();
+      g.strokeStyle = "#1c4a96"; g.lineWidth = 1; g.beginPath(); g.moveTo(x - 2.6, 117); g.lineTo(x + 0.6, 117); g.stroke();
+    }
+
+    // Barrel: a cone (half-width 34 at the base, 16 at the muzzle), shaded round, with its shadow on the body
+    soft(103, 90, 44, 9, 0.45);
+    const hw = y => 16 + 18 * (y - 18) / 74;
+    const cone = () => poly([[66, 92], [134, 92], [116, 18], [84, 18]]);
+    g.save(); cone(); g.clip();
+    g.fillStyle = lin(66, 0, 134, 0, [[0, "#c96410"], [0.18, "#f39433"], [0.32, "#ffc06a"], [0.42, "#f8a03e"], [0.75, "#e07a1a"], [1, "#a8500c"]]);
+    g.fillRect(60, 10, 80, 90);
+    // a ring around the barrel: curves down at the front, as seen from just above
+    const band = (y0, y1, col) => {
+      g.beginPath();
+      for (let k = 0; k <= 20; k++) { const t = k / 10 - 1; g.lineTo(100 + t * hw(y0) * 1.05, y0 + 3 * Math.sqrt(1 - t * t)); }
+      for (let k = 20; k >= 0; k--) { const t = k / 10 - 1; g.lineTo(100 + t * hw(y1) * 1.05, y1 + 3.4 * Math.sqrt(1 - t * t)); }
+      g.fillStyle = col; g.fill();
+    };
+    band(49, 57, lin(66, 0, 134, 0, [[0, "#c9a015"], [0.3, "#fff07a"], [0.45, "#ffd83a"], [1, "#b88a10"]]));
+    band(56, 58, "rgba(90,40,0,.25)");
+    g.fillStyle = lin(0, 18, 0, 92, [[0, "rgba(0,0,0,0)"], [1, "rgba(60,20,0,.18)"]]); g.fillRect(60, 10, 80, 90);
+    g.restore();
+    // Muzzle: a thick lip around a dark hole, lit on the far side inside
+    blob(g, 100, 18.5, 18, 7, "#b4560c");
+    g.fillStyle = lin(82, 0, 118, 0, [[0, "#e88a2c"], [0.35, "#ffc472"], [1, "#d06a14"]]);
+    g.beginPath(); g.ellipse(100, 17.5, 17, 6.3, 0, 0, Math.PI * 2); g.fill();
+    g.fillStyle = lin(0, 13, 0, 22, [[0, "#1e0c02"], [0.6, "#3a1a06"], [1, "#6a3410"]]);
+    g.beginPath(); g.ellipse(100, 17.8, 11, 4.2, 0, 0, Math.PI * 2); g.fill();
+
+    // Spare roll in the hopper on the left, so it reads as a TP blaster: a round, soft cylinder
+    soft(38, 106, 26, 6, 0.4);
+    g.fillStyle = lin(14, 0, 54, 0, [[0, "#ffffff"], [0.3, "#fbfbf5"], [0.7, "#e6e4d8"], [1, "#c8c6b8"]]);
+    g.fillRect(14, 50, 40, 56);
+    g.beginPath(); g.ellipse(34, 106, 20, 6, 0, 0, Math.PI); g.fill();
+    g.fillStyle = "#c0bfb2"; for (let y = 60; y < 104; y += 5) g.fillRect(44, y, 1.6, 1.6);
+    g.fillStyle = "rgba(0,0,0,.06)"; for (let y = 64; y < 104; y += 11) g.fillRect(14, y, 40, 1);
+    g.fillStyle = lin(14, 44, 54, 56, [[0, "#ffffff"], [1, "#e9e7dc"]]);
+    g.beginPath(); g.ellipse(34, 50, 20, 6, 0, 0, Math.PI * 2); g.fill();
+    g.strokeStyle = "rgba(0,0,0,.08)"; g.lineWidth = 0.8;
+    for (const r of [15, 11]) { g.beginPath(); g.ellipse(34, 50, r, r * 0.3, 0, 0, Math.PI * 2); g.stroke(); }
+    blob(g, 34, 50, 7, 2.6, "#a9773f"); blob(g, 34, 50.6, 5, 1.7, "#5a3412");
+
+    // Grip, rounded and shaded
+    g.fillStyle = lin(150, 0, 170, 0, [[0, "#2a5fb8"], [0.4, "#1f4fa0"], [1, "#163b7c"]]);
+    g.beginPath(); g.moveTo(150, 140); g.lineTo(150, 108); g.quadraticCurveTo(150, 103, 155, 103); g.lineTo(164, 103); g.quadraticCurveTo(169, 103, 169, 108); g.lineTo(170, 140); g.fill();
+    g.fillStyle = "rgba(255,255,255,.25)"; g.fillRect(152, 106, 2.5, 34);
     return c;
   }
   function shadeCanvas(src, v) {
