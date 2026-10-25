@@ -662,6 +662,9 @@
   let jumping = false;
   let dogJumping = false;
   let dead = false;
+  const coarse = window.matchMedia('(pointer: coarse)').matches;   // touch screen: tap; otherwise keys and mouse
+  const HINT_PLAY = coarse ? 'TAP to jump' : 'SPACE, ↑ or CLICK to jump · ESC to pause';
+  const HINT_DEAD = coarse ? 'TAP to try again' : 'SPACE or CLICK to try again';
   let paused = false;
   let collisionLoop;
   let spawnTimer;
@@ -763,10 +766,16 @@
       if (e.code === 'Enter') { e.preventDefault(); resume(); }
       return;
     }
-    if (e.code === 'Space') {
+    if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
       e.preventDefault();
       triggerJump();
     }
+  });
+  // Mouse: a click jumps (or tries again), like a tap; not on the buttons. Touch is handled by touchstart.
+  document.addEventListener('mousedown', (e) => {
+    if (e.button !== 0 || e.target.closest('.pause-ui, .pause-btn, .dead-menu')) return;
+    e.preventDefault();
+    triggerJump();
   });
 
   document.addEventListener('touchstart', (e) => {
@@ -938,7 +947,7 @@
     label.style.animation = 'none';
 
     // Restart hint
-    document.querySelector('.hint').textContent = 'Tap or SPACE to try again';
+    document.querySelector('.hint').textContent = HINT_DEAD;
 
     // Dog trots over to comfort the fallen kid, then licks its face with love hearts
     dog.classList.remove('jumping');
@@ -994,7 +1003,7 @@
     label.textContent = 'James and Harry Poop Runner';
     label.style.fontSize = '';
     label.style.animation = '';
-    document.querySelector('.hint').textContent = 'SPACE or TAP to jump';
+    document.querySelector('.hint').textContent = HINT_PLAY;
     loop();
     clearTimeout(spawnTimer);
     spawnTimer = setTimeout(launchPoop, 800);
@@ -1005,6 +1014,7 @@
     if (!paused) checkCollision();
     collisionLoop = requestAnimationFrame(loop);
   }
+  document.querySelector('.hint').textContent = HINT_PLAY;
   pickRandomFace();
   loop();
   spawnTimer = setTimeout(launchPoop, 800);
@@ -1043,7 +1053,6 @@
   // Phones and tablets: turning upright pauses (the "turn sideways" screen covers the game), and so does
   // opening the game upright, so nothing runs behind that screen. Phones report a turn in different ways (or late),
   // so listen for all of them, and check twice a second as well.
-  const coarse = window.matchMedia('(pointer: coarse)').matches;
   const onUpright = () => { if (coarse && window.innerHeight > window.innerWidth) pause(); };
   const upright = window.matchMedia('(orientation: portrait)');
   if (upright.addEventListener) upright.addEventListener('change', onUpright); else upright.addListener(onUpright);
