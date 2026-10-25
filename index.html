@@ -1564,7 +1564,6 @@
     overlay.hidden = true;
     play();
     lockPointer();
-    fullScreen();
   }
   function play() {
     phase = "play"; running = true;
@@ -1582,15 +1581,17 @@
   }
   document.addEventListener("visibilitychange", () => { if (document.hidden) pause(); });
 
-  // Phones: hide the browser bars and hold the screen sideways where the browser allows it (not iPhone Safari)
+  // Phones: go full screen (and hold it sideways where allowed) on every tap until it sticks.
+  // Browsers only allow this from the end of a tap, and iPhone Safari not at all.
   function fullScreen() {
     const el = document.documentElement, req = el.requestFullscreen || el.webkitRequestFullscreen;
-    if (!coarse || !req || document.fullscreenElement || document.webkitFullscreenElement) return;
+    if (!req || document.fullscreenElement || document.webkitFullscreenElement) return;
     try {
       const p = req.call(el, { navigationUI: "hide" });
       if (p && p.then) p.then(() => screen.orientation && screen.orientation.lock && screen.orientation.lock("landscape").catch(() => {}), () => {});
     } catch (e) {}
   }
+  document.addEventListener("touchend", fullScreen, true);
   function lockPointer() {
     if (coarse || !cv.requestPointerLock) return;
     try { const p = cv.requestPointerLock(); if (p && p.catch) p.catch(() => {}); } catch (e) {}
