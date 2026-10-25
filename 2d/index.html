@@ -451,6 +451,36 @@
     color: white;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.4);
   }
+  /* Pause: everything stops where it is; a card offers Resume or the main menu */
+  body.paused *, body.paused *::before, body.paused *::after { animation-play-state: paused !important; }
+  .pause-btn {
+    position: absolute; top: 12px; right: 12px; z-index: 50;
+    width: 44px; height: 44px; border-radius: 50%;
+    border: 3px solid #fff; background: rgba(0,0,0,0.25); color: #fff;
+    font: bold 16px/1 sans-serif; cursor: pointer;
+  }
+  .pause-ui {
+    position: fixed; inset: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: center; padding: 16px;
+    background: rgba(0,0,0,0.35);
+  }
+  .pause-ui[hidden] { display: none; }
+  .pause-card {
+    background: #fffaf0; border: 4px solid #fff; border-radius: 24px; padding: 22px 26px;
+    text-align: center; color: #5a4630; font-family: sans-serif;
+    box-shadow: 0 8px 0 rgba(0,0,0,0.15), 0 14px 30px rgba(0,0,0,0.2);
+  }
+  .pause-card h2 { font-size: 2rem; color: #6b3f17; }
+  .pause-card .pause-score { margin-top: 4px; font-size: 1.1rem; }
+  .pause-btns { margin-top: 16px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .pause-btns button, .pause-btns a {
+    font: bold 1.1rem/1 sans-serif; padding: 12px 24px; border-radius: 999px; cursor: pointer; text-decoration: none;
+  }
+  .pause-btns button { background: #FF6B35; color: #fff; border: 0; box-shadow: 0 4px 0 #c94a1c; }
+  .pause-btns a { background: #fff; color: #FF6B35; border: 2px solid #f1e3c4; box-shadow: 0 4px 0 #f1e3c4; }
+  .pause-card .pause-keys { margin-top: 12px; font-size: .85rem; opacity: .7; }
+  @media (pointer: coarse) { .pause-card .pause-keys { display: none; } }
+
   @keyframes scorePop {
     0%   { transform: scale(1); }
     50%  { transform: scale(1.6); }
@@ -543,6 +573,18 @@
   <div class="label">James and Harry Poop Runner</div>
   <div class="hint">SPACE or TAP to jump</div>
   <div class="score">💩 0</div>
+  <button class="pause-btn" id="pause-btn" type="button" aria-label="Pause">II</button>
+  <div class="pause-ui" id="pause-ui" hidden>
+    <div class="pause-card" role="dialog" aria-label="Paused">
+      <h2>Paused</h2>
+      <p class="pause-score" id="pause-score"></p>
+      <div class="pause-btns">
+        <button type="button" id="resume-btn">Resume</button>
+        <a href="../" id="menu-btn">Main menu</a>
+      </div>
+      <p class="pause-keys">Esc to resume</p>
+    </div>
+  </div>
   <div class="sun"></div>
   <div class="cloud cloud1"></div>
   <div class="cloud cloud2"></div>
@@ -611,6 +653,7 @@
   let jumping = false;
   let dogJumping = false;
   let dead = false;
+  let paused = false;
   let collisionLoop;
   let spawnTimer;
   let poopId = 0;           // unique id per poop instance
@@ -644,32 +687,6 @@
     } catch (e) { /* audio not available — ignore */ }
   }
 
-  // The dog barks now and then while you run: two or three woofs, each a throaty falling growl
-  // through a mouth-shaped filter with a puff of breath at the start
-  function woof(t, pitch) {
-    const o = audioCtx.createOscillator(), f = audioCtx.createBiquadFilter(), g = audioCtx.createGain();
-    o.type = 'sawtooth';
-    o.frequency.setValueAtTime(430 * pitch, t); o.frequency.exponentialRampToValueAtTime(170 * pitch, t + 0.16);
-    f.type = 'bandpass'; f.Q.value = 2;
-    f.frequency.setValueAtTime(1200, t); f.frequency.exponentialRampToValueAtTime(520, t + 0.16);
-    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.7, t + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.19);
-    o.connect(f).connect(g).connect(audioCtx.destination); o.start(t); o.stop(t + 0.2);
-    const len = 0.07 * audioCtx.sampleRate | 0, b = audioCtx.createBuffer(1, len, audioCtx.sampleRate), d = b.getChannelData(0);
-    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len) ** 2;
-    const n = audioCtx.createBufferSource(), nf = audioCtx.createBiquadFilter(), ng = audioCtx.createGain();
-    n.buffer = b; nf.type = 'bandpass'; nf.frequency.value = 1500; nf.Q.value = 1; ng.gain.value = 0.5;
-    n.connect(nf).connect(ng).connect(audioCtx.destination); n.start(t);
-  }
-  let barkTimer;
-  function bark() {
-    barkTimer = setTimeout(bark, 6000 + Math.random() * 6000);
-    if (dead || document.hidden || !audioCtx) return;   // sound starts with the first tap or key
-    try {
-      const t = audioCtx.currentTime + 0.01, pitch = 0.9 + Math.random() * 0.25, n = Math.random() < 0.3 ? 3 : 2;
-      for (let i = 0; i < n; i++) woof(t + i * 0.22, pitch * (1 - i * 0.04));
-    } catch (e) { /* audio not available — ignore */ }
-  }
-  barkTimer = setTimeout(bark, 4000);
 
   /* ---- Randomized poop launch: fresh element each crossing ---- */
   const activePoops = [];   // { el, id, cleared, scored }
@@ -684,13 +701,23 @@
       : (r < 0.45 ? 1 : (r < 0.8 ? 2 : 3));
     // one speed for the whole wave so cluster poops stay tightly packed (jumpable in one arc)
     // mobile: slower (easier to time the jump)
-    const dur = isMobile
+    let dur = isMobile
       ? 2.8 + Math.random() * 2.0   // 2.8s–4.8s
       : 1.6 + Math.random() * 2.6;  // 1.6s–4.2s
+    // Poops have to pass the kid inside one jump (0.6 s of air) with time to spare, or they can't be cleared.
+    // Slow poops, and narrower screens (phones sideways), take longer to pass: on small screens the slowest
+    // poops speed up a little, and a clump uses fewer poops when it would take too long.
+    const travel = window.innerWidth * 1.1 + 80;             // px, from the poopSlide keyframes
+    const kidScale = (wrapper.querySelector('.kid').getBoundingClientRect().width || 80) / 80;
+    const POOP_W = 56, GAP = 44, MAX_PASS = 0.42;           // touching poops; leaves ~0.18 s to time the jump
+    dur = Math.min(dur, travel * MAX_PASS / (50 * kidScale + POOP_W));
+    const speed = travel / dur;                              // px/s
+    let n = count;
+    while (n > 1 && (50 * kidScale + POOP_W + (n - 1) * GAP) / speed > MAX_PASS) n--;
     let maxTotal = 0;
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < n; i++) {
       // tiny stagger keeps them touching — one jump clears the whole clump
-      const delay = i * 0.18;
+      const delay = i * GAP / speed;
       maxTotal = Math.max(maxTotal, dur + delay);
       spawnOne(dur, delay);
     }
@@ -718,6 +745,15 @@
   }
 
   document.addEventListener('keydown', (e) => {
+    if (e.code === 'Escape' || e.code === 'KeyP') {
+      e.preventDefault();
+      if (paused) resume(); else pause();
+      return;
+    }
+    if (paused) {
+      if (e.code === 'Enter') { e.preventDefault(); resume(); }
+      return;
+    }
     if (e.code === 'Space') {
       e.preventDefault();
       triggerJump();
@@ -725,6 +761,7 @@
   });
 
   document.addEventListener('touchstart', (e) => {
+    if (e.target.closest('.pause-ui, .pause-btn')) return;   // let the pause buttons get their tap
     e.preventDefault();
     triggerJump();
   }, { passive: false });
@@ -744,6 +781,7 @@
   });
 
   function triggerJump() {
+    if (paused) return;
     if (dead) return restart();
     if (jumping) return;
     jumping = true;
@@ -951,25 +989,44 @@
 
   function loop() {
     if (dead) return;
-    checkCollision();
+    if (!paused) checkCollision();
     collisionLoop = requestAnimationFrame(loop);
   }
   pickRandomFace();
   loop();
   spawnTimer = setTimeout(launchPoop, 800);
 
+  // ---- Pause (Esc / P, or the II button): freeze everything, offer Resume or the main menu ----
+  const pauseUi = document.getElementById('pause-ui');
+  function pause() {
+    if (paused || dead) return;
+    paused = true;
+    clearTimeout(spawnTimer);
+    document.body.classList.add('paused');
+    document.getElementById('pause-score').textContent = '💩 ' + score + ' jumped so far';
+    pauseUi.hidden = false;
+    document.getElementById('resume-btn').focus({ preventScroll: true });
+  }
+  function resume() {
+    if (!paused) return;
+    paused = false;
+    pauseUi.hidden = true;
+    document.body.classList.remove('paused');
+    // the next wave waits for the poops still on screen to pass, as it would have
+    let left = 0;
+    activePoops.forEach(rec => rec.el.getAnimations().forEach(a => {
+      const t = a.effect.getComputedTiming();
+      left = Math.max(left, t.endTime - (a.currentTime || 0));
+    }));
+    clearTimeout(spawnTimer);
+    spawnTimer = setTimeout(launchPoop, left + 700);
+  }
+  document.getElementById('pause-btn').addEventListener('click', () => pause());
+  document.getElementById('resume-btn').addEventListener('click', () => resume());
+
   // Pause spawning while the tab is hidden so timers don't pile up and burst on return
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-      clearTimeout(spawnTimer);
-    } else if (!dead) {
-      // clear any in-flight poops that stacked up, then resume fresh
-      clearTimeout(spawnTimer);
-      activePoops.forEach(rec => rec.el.remove());
-      activePoops.length = 0;
-      spawnTimer = setTimeout(launchPoop, 600);
-    }
-  });
+  // Switching away from the tab pauses, so you come back to the pause menu
+  document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });
 </script>
 </body>
 </html>
