@@ -1027,6 +1027,12 @@
   // Pause spawning while the tab is hidden so timers don't pile up and burst on return
   // Switching away from the tab pauses, so you come back to the pause menu
   document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });
+  // Phones and tablets: turning upright pauses (the "turn sideways" screen covers the game), and so does
+  // opening the game upright, so nothing runs behind that screen
+  const upright = window.matchMedia('(orientation: portrait) and (pointer: coarse)');
+  const onUpright = () => { if (upright.matches) pause(); };
+  if (upright.addEventListener) upright.addEventListener('change', onUpright); else upright.addListener(onUpright);
+  onUpright();
 </script>
 </body>
 </html>

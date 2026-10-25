@@ -1666,6 +1666,10 @@
     document.querySelector(".hint").hidden = true;
   }
   document.addEventListener("visibilitychange", () => { if (document.hidden) pause(); });
+  // Phones and tablets: turning upright pauses; the "turn sideways" screen covers the game
+  const upright = matchMedia("(orientation: portrait) and (pointer: coarse)");
+  const onUpright = () => { if (upright.matches) pause(); };
+  if (upright.addEventListener) upright.addEventListener("change", onUpright); else upright.addListener(onUpright);
 
   // Phones: go full screen (and hold it sideways where allowed) on every tap until it sticks.
   // Browsers only allow this from the end of a tap, and iPhone Safari not at all.
