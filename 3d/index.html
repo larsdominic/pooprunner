@@ -1666,19 +1666,24 @@
     document.querySelector(".hint").hidden = true;
   }
   document.addEventListener("visibilitychange", () => { if (document.hidden) pause(); });
-  // Phones and tablets: turning upright pauses; the "turn sideways" screen covers the game
-  const upright = matchMedia("(orientation: portrait) and (pointer: coarse)");
-  const onUpright = () => { if (upright.matches) pause(); };
+  // Phones and tablets: turning upright pauses; the "turn sideways" screen covers the game. Phones report a turn
+  // in different ways (or late), so listen for all of them, and check twice a second as well.
+  const onUpright = () => { if (coarse && innerHeight > innerWidth) pause(); };
+  const upright = matchMedia("(orientation: portrait)");
   if (upright.addEventListener) upright.addEventListener("change", onUpright); else upright.addListener(onUpright);
+  addEventListener("resize", onUpright);
+  addEventListener("orientationchange", onUpright);
+  if (screen.orientation && screen.orientation.addEventListener) screen.orientation.addEventListener("change", onUpright);
+  setInterval(onUpright, 500);
 
-  // Phones: go full screen (and hold it sideways where allowed) on every tap until it sticks.
-  // Browsers only allow this from the end of a tap, and iPhone Safari not at all.
+  // Phones: go full screen on every tap until it sticks. Browsers only allow this from the end of a tap, and iPhone
+  // Safari not at all. The screen isn't locked sideways: turning the phone upright has to reach the page so it can pause.
   function fullScreen() {
     const el = document.documentElement, req = el.requestFullscreen || el.webkitRequestFullscreen;
     if (!req || document.fullscreenElement || document.webkitFullscreenElement) return;
     try {
       const p = req.call(el, { navigationUI: "hide" });
-      if (p && p.then) p.then(() => screen.orientation && screen.orientation.lock && screen.orientation.lock("landscape").catch(() => {}), () => {});
+      if (p && p.catch) p.catch(() => {});
     } catch (e) {}
   }
   document.addEventListener("touchend", fullScreen, true);

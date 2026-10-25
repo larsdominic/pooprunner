@@ -769,15 +769,15 @@
   // iPhone ignores user-scalable=no for pinches: stop the pinch so the page can't zoom in
   document.addEventListener('gesturestart', (e) => e.preventDefault());
 
-  // Phones: go full screen (and hold it sideways where allowed) on every tap until it sticks.
-  // Browsers only allow this from a tap, and iPhone Safari not at all.
+  // Phones: go full screen on every tap until it sticks. Browsers only allow this from a tap, and iPhone Safari
+  // not at all. The screen isn't locked sideways: turning the phone upright has to reach the page so it can pause.
   document.addEventListener('touchend', () => {
     if (document.fullscreenElement || document.webkitFullscreenElement) return;
     const el = document.documentElement, req = el.requestFullscreen || el.webkitRequestFullscreen;
     if (!req) return;
     try {
       const p = req.call(el, { navigationUI: 'hide' });
-      if (p && p.then) p.then(() => screen.orientation && screen.orientation.lock && screen.orientation.lock('landscape').catch(() => {}), () => {});
+      if (p && p.catch) p.catch(() => {});
     } catch (e) {}
   });
 
@@ -1029,10 +1029,16 @@
   // Switching away from the tab pauses, so you come back to the pause menu
   document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });
   // Phones and tablets: turning upright pauses (the "turn sideways" screen covers the game), and so does
-  // opening the game upright, so nothing runs behind that screen
-  const upright = window.matchMedia('(orientation: portrait) and (pointer: coarse)');
-  const onUpright = () => { if (upright.matches) pause(); };
+  // opening the game upright, so nothing runs behind that screen. Phones report a turn in different ways (or late),
+  // so listen for all of them, and check twice a second as well.
+  const coarse = window.matchMedia('(pointer: coarse)').matches;
+  const onUpright = () => { if (coarse && window.innerHeight > window.innerWidth) pause(); };
+  const upright = window.matchMedia('(orientation: portrait)');
   if (upright.addEventListener) upright.addEventListener('change', onUpright); else upright.addListener(onUpright);
+  window.addEventListener('resize', onUpright);
+  window.addEventListener('orientationchange', onUpright);
+  if (screen.orientation && screen.orientation.addEventListener) screen.orientation.addEventListener('change', onUpright);
+  setInterval(onUpright, 500);
   onUpright();
 </script>
 </body>
