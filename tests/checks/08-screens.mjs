@@ -2,13 +2,24 @@
 export const opts = [
   { label: "desktop" },
   { label: "phone landscape", w: 480, h: 300, touch: true },
+  { label: "wide phone landscape", w: 844, h: 390, touch: true },
   { label: "phone portrait", w: 390, h: 844, touch: true },
 ];
 
 export default async (t, o) => {
   for (let i = 0; i < 40 && !(await t.eval("!!(window.__pr3d && __pr3d.state.ready)")); i++) await t.sleep(250);
+  // Phones are sideways only: held upright, a notice asks you to turn
+  const notice = await t.eval("getComputedStyle(document.querySelector('.rotate-notice')).display");
+  if (o.h > o.w) { t.assert(notice === "flex", "no turn-sideways notice in portrait"); return; }
+  t.assert(notice === "none", "turn-sideways notice showing sideways");
+
   if (o.touch) {
-    t.assert(await t.eval("document.getElementById('view').width") === 480, "phone canvas should be 480 wide");
+    // The picture matches the game frame's shape, and sideways the frame is the whole screen
+    const fill = await t.eval(`(() => { const c = document.getElementById("view"), r = c.getBoundingClientRect();
+      return { h: c.height, aspect: c.width / c.height, frame: r.width / r.height, w: r.width, fh: r.height }; })()`);
+    t.assert(fill.h === 270, "phone canvas should be 270 rows: " + fill.h);
+    t.assert(Math.abs(fill.aspect - fill.frame) < 0.02, `picture ${fill.aspect.toFixed(2)} does not match the frame ${fill.frame.toFixed(2)}`);
+    t.assert(fill.w === o.w && fill.fh === o.h, `game frame ${fill.w}x${fill.fh} does not fill the ${o.w}x${o.h} screen`);
     const off = await t.eval(`["pick-james", "pick-harry", "easy", "ov-btn"].filter(id => {
       const r = document.getElementById(id).getBoundingClientRect();
       return !(r.width > 0 && r.left >= 0 && r.top >= 0 && r.right <= innerWidth && r.bottom <= innerHeight);
