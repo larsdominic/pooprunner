@@ -32,6 +32,16 @@ export default async (t, o) => {
     await t.eval("__pr3d.tick(0.05)");
     await t.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
     t.assert((await t.eval("__pr3d.state")).rolls === 29, "Throw button did not throw: rolls " + (await t.eval("__pr3d.state")).rolls);
+
+    // Pause offers a way back to the game menu, on screen; the Resume screen goes back to play
+    t.assert(await t.eval("document.getElementById('ov-menu').hidden"), "Back to menu showing while playing");
+    await t.eval("document.getElementById('pause-btn').click()");
+    const menu = await t.eval(`(() => { const a = document.getElementById("ov-menu"), r = a.getBoundingClientRect();
+      return { shown: !a.hidden && r.width > 0 && r.right <= innerWidth && r.bottom <= innerHeight, href: a.href }; })()`);
+    t.assert(menu.shown, "no Back to menu button on the pause screen");
+    t.assert(menu.href === "https://pooprunner.lol/", "Back to menu goes to " + menu.href);
+    await t.eval("document.getElementById('ov-btn').click()");
+    t.assert((await t.eval("__pr3d.state")).running, "Resume did not resume");
     return;
   }
 

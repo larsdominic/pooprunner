@@ -129,6 +129,18 @@
     cursor: pointer;
   }
   .panel button.go:hover { background: var(--orange-hi); }
+  .panel .back {
+    font: 800 16px/1 var(--ui);
+    color: var(--orange);
+    background: #fff;
+    border: 2px solid var(--cream-hi);
+    border-radius: 999px;
+    padding: 11px 20px;
+    box-shadow: 0 4px 0 var(--cream-hi);
+    text-decoration: none;
+  }
+  .panel .back:hover { border-color: var(--orange-hi); }
+  .panel .back:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
   .panel button:focus-visible, .pick button:focus-visible, .easy input:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
 
   .who { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
@@ -289,6 +301,7 @@
     .pick img { width: 34px; height: 34px; }
     .pick button { padding: 4px 8px; }
     .panel button.go { padding: 10px 16px; font-size: 14px; }
+    .panel .back { padding: 8px 14px; font-size: 14px; }
     .hud { padding: 3px 10px; gap: 4px 14px; }
     #hud-face { width: 32px; height: 32px; }
     .stat b { font-size: 1.15rem; }
@@ -332,6 +345,7 @@
         <div class="row">
           <label class="easy"><input type="checkbox" id="easy"> Easy (slower poops, less stink)</label>
           <button class="go" id="ov-btn" type="button">Start cleaning!</button>
+          <a class="back" id="ov-menu" href="https://pooprunner.lol/" hidden>Back to menu</a>
         </div>
       </div>
       <dl class="keys" id="keys-desktop">
@@ -1533,8 +1547,9 @@
 
   const overlay = $("overlay");
   let overlayAt = 0;
-  function showOverlay(eyebrow, title, text, btn, titleScreen = false) {
+  function showOverlay(eyebrow, title, text, btn, titleScreen = false, menu = false) {
     document.querySelector(".pick").hidden = document.querySelector(".easy").hidden = !titleScreen;
+    $("ov-menu").hidden = !menu;
     $("touch-ui").hidden = true;
     overlayAt = performance.now();
     $("ov-eyebrow").textContent = eyebrow;
@@ -1554,7 +1569,7 @@
   function pause() {
     if (!running) return;
     running = false; trigger = false; keys.clear();
-    showOverlay("Paused", "Pooprunner 3D", `${POOPS.length - poopsLeft()} of ${POOPS.length} poops cleaned · stink ${Math.round(stink)}% · ${rolls} rolls`, "Resume");
+    showOverlay("Paused", "Pooprunner 3D", `${POOPS.length - poopsLeft()} of ${POOPS.length} poops cleaned · stink ${Math.round(stink)}% · ${rolls} rolls`, "Resume", false, true);
   }
   function start() {
     if (!ready) return;
