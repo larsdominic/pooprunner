@@ -37,9 +37,9 @@ export default async (t, o) => {
     t.assert(await t.eval("document.getElementById('ov-menu').hidden"), "Back to menu showing while playing");
     await t.eval("document.getElementById('pause-btn').click()");
     const menu = await t.eval(`(() => { const a = document.getElementById("ov-menu"), r = a.getBoundingClientRect();
-      return { shown: !a.hidden && r.width > 0 && r.right <= innerWidth && r.bottom <= innerHeight, href: a.href }; })()`);
+      return { shown: !a.hidden && r.width > 0 && r.right <= innerWidth && r.bottom <= innerHeight, href: a.href, menu: new URL("../", location.href).href }; })()`);
     t.assert(menu.shown, "no Back to menu button on the pause screen");
-    t.assert(menu.href === "https://pooprunner.lol/", "Back to menu goes to " + menu.href);
+    t.assert(menu.href === menu.menu, "Back to menu goes to " + menu.href);   // the game picker, one folder up
     await t.eval("document.getElementById('ov-btn').click()");
     t.assert((await t.eval("__pr3d.state")).running, "Resume did not resume");
     return;
