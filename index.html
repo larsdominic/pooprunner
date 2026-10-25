@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Pooprunner 3D</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%235fb4ff'/%3E%3Cellipse cx='32' cy='50' rx='22' ry='8' fill='%235e3511'/%3E%3Cellipse cx='32' cy='47' rx='21' ry='8' fill='%237a4a1e'/%3E%3Cellipse cx='32' cy='36' rx='15' ry='7' fill='%237a4a1e'/%3E%3Cellipse cx='32' cy='26' rx='9' ry='6' fill='%237a4a1e'/%3E%3Cpath d='M30 21q6-9 2-11' stroke='%237a4a1e' stroke-width='5' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='27' cy='38' r='3.5' fill='white'/%3E%3Ccircle cx='37' cy='38' r='3.5' fill='white'/%3E%3Ccircle cx='27.8' cy='38.5' r='1.6'/%3E%3Ccircle cx='37.8' cy='38.5' r='1.6'/%3E%3C/svg%3E">
 <style>
@@ -25,6 +25,7 @@
   }
   [hidden] { display: none !important; }
   html, body { height: 100%; margin: 0; }
+  html { touch-action: manipulation; -webkit-text-size-adjust: 100%; }   /* no double-tap zoom */
   body {
     box-sizing: border-box;
     background: linear-gradient(var(--sky), #e6f5ff 60%, #cfe9b8);
@@ -898,7 +899,12 @@
     if (px !== undefined) view(px, py, Math.atan2(dy, dx));
     render();
   }
+  // Re-fit whenever the frame changes size: rotating, full screen, browser bars. ResizeObserver runs after layout,
+  // where a rotation's resize event can arrive before the new size is known (iPhone)
   addEventListener("resize", fit);
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(cv.parentElement);
+  // iPhone ignores user-scalable=no for pinches: stop the pinch so the page can't zoom in on the game
+  document.addEventListener("gesturestart", e => e.preventDefault());
   fit();
   function init() {
     view(...START);
