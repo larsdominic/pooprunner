@@ -1350,12 +1350,9 @@
         if (canStand(ox, oy, 0.2)) { g.x = ox; g.y = oy; g.stuck = 0; break; }
     }
     if (g.barkT >= 4 && sprites.some(p => POOP[p.kind] && !p.gone && (p.x - g.x) ** 2 + (p.y - g.y) ** 2 < 16)) {
-      g.barkT = 0; g.yapT = 0; sfxBark();
+      g.barkT = 0;
       if (msgT < 1) setMsg("Woof!");   // don't bury a fresh message (King coming, TP pack by the gate...)
     }
-    // ...and every so often just because he's happy to be at the park
-    g.yapT = (g.yapT || 0) + dt;
-    if (g.yapT >= (g.yapGap || 8)) { g.yapT = 0; g.yapGap = 6 + Math.random() * 6; sfxBark(); }
   }
 
   // Once the park is clean, King Poop comes out of the toilet block
@@ -1701,24 +1698,6 @@
     const src = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain();
     src.buffer = b; f.type = "bandpass"; f.frequency.value = 1400; f.Q.value = 0.8; g.gain.value = 0.35;
     src.connect(f).connect(g).connect(ac.destination); src.start();
-  }
-  // A woof: a throaty falling growl through a mouth-shaped filter, with a puff of breath at the start
-  function woof(t, pitch) {
-    const o = ac.createOscillator(), f = ac.createBiquadFilter(), g = ac.createGain();
-    o.type = "sawtooth"; o.frequency.setValueAtTime(430 * pitch, t); o.frequency.exponentialRampToValueAtTime(170 * pitch, t + 0.16);
-    f.type = "bandpass"; f.Q.value = 2; f.frequency.setValueAtTime(1200, t); f.frequency.exponentialRampToValueAtTime(520, t + 0.16);
-    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.7, t + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.19);
-    o.connect(f).connect(g).connect(ac.destination); o.start(t); o.stop(t + 0.2);
-    const len = 0.07 * ac.sampleRate | 0, b = ac.createBuffer(1, len, ac.sampleRate), d = b.getChannelData(0);
-    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len) ** 2;
-    const n = ac.createBufferSource(), nf = ac.createBiquadFilter(), ng = ac.createGain();
-    n.buffer = b; nf.type = "bandpass"; nf.frequency.value = 1500; nf.Q.value = 1; ng.gain.value = 0.5;
-    n.connect(nf).connect(ng).connect(ac.destination); n.start(t);
-  }
-  function sfxBark() {
-    if (!ac) return;
-    const t = ac.currentTime + 0.01, pitch = 0.9 + Math.random() * 0.25, n = Math.random() < 0.3 ? 3 : 2;
-    for (let i = 0; i < n; i++) woof(t + i * 0.22, pitch * (1 - i * 0.04));
   }
   function sfxSpray() {
     if (!ac) return;
