@@ -493,7 +493,7 @@
     .hint { font-size: 0.9rem; letter-spacing: 0.03em; }
   }
 
-  /* Portrait lock — ask phone users to rotate back to upright */
+  /* Landscape lock: ask phone and tablet users to turn sideways */
   .rotate-notice {
     display: none;
     position: fixed;
@@ -524,8 +524,8 @@
     0%, 100% { transform: rotate(0deg); }
     50%      { transform: rotate(-90deg); }
   }
-  /* show only on short landscape screens (phones held sideways) */
-  @media (orientation: landscape) and (max-height: 500px) {
+  /* show only on touch screens held upright */
+  @media (orientation: portrait) and (pointer: coarse) {
     .rotate-notice { display: flex; }
   }
 </style>
@@ -534,7 +534,7 @@
 
   <div class="rotate-notice">
     <div class="rot-emoji">📱</div>
-    <div class="rot-text">Please turn your phone upright to play!</div>
+    <div class="rot-text">Please turn your phone sideways to play!</div>
   </div>
 
   <div class="label">James and Harry Poop Runner</div>
@@ -584,7 +584,9 @@
 <script>
   // Set ground as fixed px from actual viewport — fixes iOS 40% mismatch
   function setGround() {
-    var groundPx = window.innerHeight * 0.4;
+    // phones held sideways are short: sit the ground lower so the jump stays on screen
+    var shortLandscape = window.matchMedia("(orientation: landscape) and (max-height: 500px)").matches;
+    var groundPx = window.innerHeight * (shortLandscape ? 0.22 : 0.4);
     document.documentElement.style.setProperty("--ground", groundPx + "px");
   }
   setGround();
