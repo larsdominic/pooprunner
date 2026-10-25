@@ -28,6 +28,7 @@ export default async (t, o) => {
   s = await st();
   t.assert(s.over === "win", "not won after the rolls: " + s.over + " king " + JSON.stringify(s.king));
   t.assert(await t.eval("document.getElementById('ov-title').textContent") === "Park clean!", "win title wrong");
+  t.assert(!(await t.eval("document.getElementById('ov-menu').hidden")), "no Back to menu on the win screen");
   t.assert(/\d+:\d\d/.test(await t.eval("document.getElementById('ov-text').textContent")), "win text has no time");
 
   // Review Focus 2: Play again resets everything

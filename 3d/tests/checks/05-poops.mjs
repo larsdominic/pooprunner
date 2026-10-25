@@ -59,5 +59,6 @@ export default async (t, o) => {
   await t.eval("__pr3d.clear('poops', 'cloud'), __pr3d.set({ stink: 95 }), __pr3d.view(16.5, 20.5, -Math.PI / 2), __pr3d.place('small', 16.5, 19.9, { awake: true }), __pr3d.tick(0.3)");
   s = await st();
   t.assert(s.over === "lose", "not lost at full stink: " + s.over);
+  t.assert(!(await t.eval("document.getElementById('ov-menu').hidden")), "no Back to menu on the lose screen");
   t.assert(await t.eval("document.getElementById('ov-title').textContent") === "Too stinky!", "lose title wrong");
 };
