@@ -1327,17 +1327,23 @@
       if (canStand(cx, cy, 0.2) && los(px, py, cx, cy)) { tx = cx; ty = cy; break; }
     }
     const dT = Math.hypot(tx - g.x, ty - g.y), dP = Math.hypot(px - g.x, py - g.y);
-    g.moving = false;
-    if (dT > 0.4) {
-      // Sprints to get round in front when you turn, trots while weaving
-      const v = (dT > 2.5 ? 6 : 2.4) * dt, ux = (tx - g.x) / dT, uy = (ty - g.y) / dT;
-      const ox = g.x, oy = g.y;
+    // Speed eases with distance (sprints to get round in front when you turn, slows as it arrives),
+    // so it doesn't stop and start at each end of a weave
+    const want = Math.min(6, dT * 2.5), ox = g.x, oy = g.y;
+    if (dT > 0.02) {
+      const v = want * dt, ux = (tx - g.x) / dT, uy = (ty - g.y) / dT;
       if (canStand(g.x + ux * v, g.y, 0.2) && !blockedBySprite(g.x + ux * v, g.y, g)) g.x += ux * v;
       if (canStand(g.x, g.y + uy * v, 0.2) && !blockedBySprite(g.x, g.y + uy * v, g)) g.y += uy * v;
-      g.moving = g.x !== ox || g.y !== oy;
-      if (g.moving) g.heading = Math.atan2(g.y - oy, g.x - ox);
-      g.stuck = g.moving ? 0 : g.stuck + dt;
-    } else { g.stuck = 0; g.heading = Math.atan2(py - g.y, px - g.x); }
+    }
+    const sp = Math.hypot(g.x - ox, g.y - oy) / (dt || 1);
+    g.stuck = want > 0.5 && sp < 0.05 ? g.stuck + dt : 0;
+    // Running: face where it's going; only after standing still for a second, turn to look at you.
+    // Turns are gradual, so it never snaps between facing you and facing away.
+    g.moving = sp > (g.moving ? 0.1 : 0.4);
+    g.idle = g.moving ? 0 : (g.idle || 0) + dt;
+    const face = g.moving ? Math.atan2(g.y - oy, g.x - ox) : g.idle > 1 ? Math.atan2(py - g.y, px - g.x) : g.heading;
+    const turn = Math.atan2(Math.sin(face - g.heading), Math.cos(face - g.heading));
+    g.heading += Math.max(-5 * dt, Math.min(5 * dt, turn));
     if (g.stuck > 3 || dP > 12) {
       // Lost: pop back in out in front of the player (behind only if there's no room ahead)
       for (const [ox, oy] of [[tx, ty], [px + dx * 2, py + dy * 2], [px + dx, py + dy], [px + lx, py + ly], [px - lx, py - ly], [px - dx, py - dy]])
@@ -1757,7 +1763,7 @@
       for (const s of sprites) kinds[s.kind] = (kinds[s.kind] || 0) + 1;
       const k = sprites.find(s => s.kind === "king" && !s.gone);
       return { ready, running, over, kid, phase, px, py, angle: Math.atan2(dy, dx), rolls, stink, splat, easy, poopsLeft: poopsLeft(), flowers: kinds.flowers, kinds, msg: hud.msg.textContent,
-        king: k ? { hp: k.hp, x: k.x, y: k.y } : null, dog: dog && { x: dog.x, y: dog.y }, barkT: dog && dog.barkT,
+        king: k ? { hp: k.hp, x: k.x, y: k.y } : null, dog: dog && { x: dog.x, y: dog.y, heading: dog.heading, moving: dog.moving }, barkT: dog && dog.barkT,
         props: sprites.filter(s => PROPS.some(p => p[0] === s.kind)).length };
     },
     find: kind => sprites.filter(s => s.kind === kind).map(({ x, y, z }) => ({ x, y, z })),

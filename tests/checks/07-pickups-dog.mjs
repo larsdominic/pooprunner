@@ -36,6 +36,21 @@ export default async t => {
   a = ahead(await st());
   t.assert(a.d > 2 && a.d < 5.5 && a.cos > 0.6, `dog did not come round in front after a turn: ${a.d.toFixed(1)} away, cos ${a.cos.toFixed(2)}`);
 
+  // Standing still while it weaves: it turns smoothly and doesn't flick between running and standing
+  await t.eval("__pr3d.view(16.5, 24.5, -Math.PI / 2), __pr3d.tick(3)");
+  const run = await t.eval(`(() => {
+    let jump = 0, flips = 0, h = __pr3d.state.dog.heading, m = __pr3d.state.dog.moving;
+    for (let i = 0; i < 600; i++) {
+      __pr3d.tick(1 / 60);
+      const d = __pr3d.state.dog, dh = Math.abs(Math.atan2(Math.sin(d.heading - h), Math.cos(d.heading - h)));
+      jump = Math.max(jump, dh); if (d.moving !== m) flips++;
+      h = d.heading; m = d.moving;
+    }
+    return { jump, flips };
+  })()`);
+  t.assert(run.jump < 0.1, "dog snapped round by " + run.jump.toFixed(2) + " rad in one frame");
+  t.assert(run.flips <= 6, "dog flicked between running and standing " + run.flips + " times in 10 s");
+
   // ...and barks at poops
   await t.eval("__pr3d.place('small', __pr3d.state.dog.x + 2, __pr3d.state.dog.y), __pr3d.tick(1)");
   t.assert((await st()).msg === "Woof!", "no bark: " + (await st()).msg);
