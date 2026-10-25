@@ -699,6 +699,18 @@
     triggerJump();
   }, { passive: false });
 
+  // Phones: go full screen (and hold it sideways where allowed) on every tap until it sticks.
+  // Browsers only allow this from a tap, and iPhone Safari not at all.
+  document.addEventListener('touchend', () => {
+    if (document.fullscreenElement || document.webkitFullscreenElement) return;
+    const el = document.documentElement, req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (!req) return;
+    try {
+      const p = req.call(el, { navigationUI: 'hide' });
+      if (p && p.then) p.then(() => screen.orientation && screen.orientation.lock && screen.orientation.lock('landscape').catch(() => {}), () => {});
+    } catch (e) {}
+  });
+
   function triggerJump() {
     if (dead) return restart();
     if (jumping) return;

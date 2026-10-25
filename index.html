@@ -69,9 +69,46 @@
     box-shadow: 0 4px 0 #c94a1c;
   }
   .game.three .play { background: #2E7D32; box-shadow: 0 4px 0 #1b5e20; }
+
+  /* Phones sideways are short: both games side by side, no scrolling */
+  @media (orientation: landscape) and (max-height: 500px) {
+    body { padding: 10px 16px 14px; justify-content: center; }
+    h1 { margin-top: 0; font-size: 2.2rem; }
+    .sub { margin: 4px 0 12px; font-size: 1rem; }
+    .games { grid-template-columns: repeat(2, minmax(0, 300px)); gap: 16px; }
+    .game { padding: 12px 14px 14px; border-radius: 20px; }
+    .art { font-size: 2.6rem; height: 2.9rem; }
+    .game h2 { margin-top: 6px; font-size: 1.3rem; }
+    .game p { margin-top: 4px; font-size: .9rem; }
+    .play { margin-top: 10px; padding: 9px 24px; font-size: 1rem; }
+    .sun { top: 12px; right: 5%; width: 44px; height: 44px; }
+    .cloud1 { top: 22px; }
+    .cloud2 { top: 12px; }
+  }
+
+  /* The games are sideways only: on phones and tablets held upright, ask to turn first */
+  .rotate-notice {
+    display: none; position: fixed; inset: 0; z-index: 10;
+    flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+    padding: 24px; text-align: center;
+    background: linear-gradient(180deg, #87CEEB 0%, #228B22 100%);
+    color: #fff; font-size: 1.4rem; font-weight: bold; line-height: 1.4;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, .3);
+  }
+  .rotate-notice p { max-width: 320px; }
+  .rot-emoji { font-size: 4rem; animation: rot-hint 1.5s ease-in-out infinite; }
+  @keyframes rot-hint { 50% { transform: rotate(-90deg); } }
+  @media (orientation: portrait) and (pointer: coarse) {
+    .rotate-notice { display: flex; }
+  }
 </style>
 </head>
 <body>
+  <div class="rotate-notice">
+    <div class="rot-emoji">📱</div>
+    <p>Turn your phone sideways to play Poop Runner!</p>
+  </div>
+
   <div class="sun"></div>
   <div class="cloud cloud1"></div>
   <div class="cloud cloud2"></div>
