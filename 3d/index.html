@@ -185,8 +185,17 @@
   .confetti i { position: absolute; top: -16px; width: 9px; height: 14px; border-radius: 2px; animation: confetti-fall linear infinite; }
   @keyframes confetti-fall { to { transform: translateY(calc(100vh + 32px)) rotate(900deg); } }
   @media (prefers-reduced-motion: reduce) { .confetti, .victory div, .victory::before { animation: none; } .confetti { display: none; } }
-  .panel .back:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
-  .panel button:focus-visible, .pick button:focus-visible, .easy input:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+  /* Focus ring (shows which button Enter / Space presses): a white gap and a blue ring that hug the pill,
+     drawn with box-shadow so it follows the rounded shape and keeps the button's raised bottom edge */
+  .panel button.go:focus-visible { outline: none; box-shadow: 0 4px 0 #b85f10, 0 0 0 3px var(--cream), 0 0 0 6px var(--blue); }
+  .panel .back:focus-visible { outline: none; box-shadow: 0 4px 0 var(--cream-hi), 0 0 0 3px var(--cream), 0 0 0 6px var(--blue); }
+  .who .pick button:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--cream), 0 0 0 6px var(--blue); }
+  .easy input:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+  @supports selector(:has(a)) {
+    .easy { padding: 3px 8px; margin: -3px -8px; border-radius: 10px; }
+    .easy input:focus-visible { outline: none; }
+    .easy:has(input:focus-visible) { box-shadow: 0 0 0 3px var(--blue); }
+  }
 
   .who { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
   .pick { display: flex; gap: 10px; }

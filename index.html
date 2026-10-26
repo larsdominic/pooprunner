@@ -56,7 +56,8 @@
     box-shadow: 0 8px 0 rgba(0, 0, 0, .15), 0 14px 30px rgba(0, 0, 0, .15);
     transition: transform .15s ease, box-shadow .15s ease;
   }
-  .game:hover, .game:focus-visible { transform: translateY(-4px) rotate(-1deg); box-shadow: 0 12px 0 rgba(0, 0, 0, .15), 0 20px 36px rgba(0, 0, 0, .2); outline: none; }
+  .game:hover, .game:focus-visible { transform: translateY(-4px) rotate(-1deg); box-shadow: 0 12px 0 rgba(0, 0, 0, .15), 0 20px 36px rgba(0, 0, 0, .2); }
+  .game:focus-visible { outline: 4px solid #2f7dff; outline-offset: 4px; }   /* keyboard: same blue ring as the games */
   .game:active { transform: translateY(2px); box-shadow: 0 4px 0 rgba(0, 0, 0, .15); }
 
   .art { font-size: 4rem; line-height: 1; height: 4.4rem; display: flex; align-items: flex-end; gap: 4px; }
