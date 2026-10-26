@@ -668,6 +668,8 @@
   let jumping = false;
   let dogJumping = false;
   let dead = false;
+  let clearAt = 0;          // performance.now() when the last wave sent will have passed the kid
+  let pausedAt = 0;
   const coarse = window.matchMedia('(pointer: coarse)').matches;   // touch screen: tap; otherwise keys and mouse
   const HINT_PLAY = coarse ? 'TAP to jump' : 'SPACE, ↑ or CLICK to jump · ESC to pause';
   const HINT_DEAD = coarse ? 'TAP to try again' : 'SPACE or CLICK to try again';
@@ -732,18 +734,22 @@
     const speed = travel / dur;                              // px/s
     let n = count;
     while (n > 1 && (50 * kidScale + POOP_W + (n - 1) * GAP) / speed > MAX_PASS) n--;
-    let maxTotal = 0;
+    // Several waves can be on screen at once, but each reaches the kid at least WAVE_GAP after the last one has
+    // passed him (a fast wave never catches up with a slow one), so there's time to land and jump again.
+    // poopSlide moves a poop's right edge from -80px to 110vw: from that, when this wave's first poop reaches
+    // the kid's hitbox, and when its last poop has left it.
+    const W = window.innerWidth, kidLeft = wrapper.getBoundingClientRect().left;
+    const hitL = kidLeft + 15 * kidScale, hitR = kidLeft + 65 * kidScale, WAVE_GAP = 0.7;
+    const tIn = (W - POOP_W - hitR + 80) / speed, tOut = (W - hitL + 80 + (n - 1) * GAP) / speed;
+    const now = performance.now();
+    const wait = Math.max(0, (clearAt - now) / 1000 + WAVE_GAP - tIn);
     for (let i = 0; i < n; i++) {
       // tiny stagger keeps them touching — one jump clears the whole clump
-      const delay = i * GAP / speed;
-      maxTotal = Math.max(maxTotal, dur + delay);
-      spawnOne(dur, delay);
+      spawnOne(dur, wait + i * GAP / speed);
     }
-    // next wave after this one clears + a random gap (always land-able)
-    // mobile: bigger breathing room between waves
-    const extra = isMobile ? (1400 + Math.random() * 2000) : (700 + Math.random() * 1500);
-    const gap = (maxTotal * 1000) + extra;
-    spawnTimer = setTimeout(launchPoop, gap);
+    clearAt = now + (wait + tOut) * 1000;
+    // the next wave sets off soon, often while this one is still on its way
+    spawnTimer = setTimeout(launchPoop, 1000 + Math.random() * 1300);
   }
 
   function spawnOne(dur, delay) {
@@ -988,6 +994,7 @@
 
   function restart() {
     dead = false;
+    clearAt = 0;
     document.body.classList.remove('dead');
     document.getElementById('dead-menu').hidden = true;
     score = 0;
@@ -1030,6 +1037,7 @@
   function pause() {
     if (paused || dead) return;
     paused = true;
+    pausedAt = performance.now();
     clearTimeout(spawnTimer);
     document.body.classList.add('paused');
     document.getElementById('pause-score').textContent = '💩 ' + score + ' jumped so far';
@@ -1041,14 +1049,10 @@
     paused = false;
     pauseUi.hidden = true;
     document.body.classList.remove('paused');
-    // the next wave waits for the poops still on screen to pass, as it would have
-    let left = 0;
-    activePoops.forEach(rec => rec.el.getAnimations().forEach(a => {
-      const t = a.effect.getComputedTiming();
-      left = Math.max(left, t.endTime - (a.currentTime || 0));
-    }));
+    // the poops on screen were frozen too: push the "passed the kid" time on by the pause
+    clearAt += performance.now() - pausedAt;
     clearTimeout(spawnTimer);
-    spawnTimer = setTimeout(launchPoop, left + 700);
+    spawnTimer = setTimeout(launchPoop, 700);
   }
   document.getElementById('pause-btn').addEventListener('click', () => pause());
   document.getElementById('resume-btn').addEventListener('click', () => resume());
