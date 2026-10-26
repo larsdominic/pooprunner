@@ -488,6 +488,8 @@
     background: #fff; color: #FF6B35; border: 2px solid #f1e3c4; box-shadow: 0 4px 0 #f1e3c4;
   }
   .dead-menu[hidden], body.dead .pause-btn { display: none; }
+  /* The big title only shows on the splat screen (as "SPLAT! Score"); while playing it's out of the way */
+  body:not(.dead) .label { display: none; }
   @media (pointer: coarse) { .pause-card .pause-keys { display: none; } }
 
   @keyframes scorePop {
