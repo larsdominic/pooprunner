@@ -12,7 +12,8 @@
   html { height: 100%; overflow: hidden; overscroll-behavior: none; }
 
   body {
-    background: linear-gradient(180deg, #87CEEB 0%, #87CEEB 60%, #90EE90 60%, #228B22 100%);
+    /* the grass starts exactly at the ground line the kid and dog run on (--ground, set from the screen height) */
+    background: linear-gradient(180deg, #87CEEB 0%, #87CEEB calc(100% - var(--ground, 40%)), #90EE90 calc(100% - var(--ground, 40%)), #228B22 100%);
     position: fixed;
     inset: 0;
     overflow: hidden;
