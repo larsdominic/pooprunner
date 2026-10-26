@@ -490,6 +490,9 @@
   .dead-menu[hidden], body.dead .pause-btn { display: none; }
   /* The big title only shows on the splat screen (as "SPLAT! Score"); while playing it's out of the way */
   body:not(.dead) .label { display: none; }
+  /* On the splat screen the score and the try-again hint sit up in the sky, under Main menu, clear of the kid and the bottom */
+  body.dead .label { top: 76px; bottom: auto; }
+  body.dead .hint { top: 132px; bottom: auto; z-index: 10; padding: 5px 14px; border-radius: 999px; background: rgba(0,0,0,0.28); color: #fff; }
   @media (pointer: coarse) { .pause-card .pause-keys { display: none; } }
 
   @keyframes scorePop {
