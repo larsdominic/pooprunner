@@ -481,10 +481,13 @@
   .pause-btns button { background: #FF6B35; color: #fff; border: 0; box-shadow: 0 4px 0 #c94a1c; }
   .pause-btns a { background: #fff; color: #FF6B35; border: 2px solid #f1e3c4; box-shadow: 0 4px 0 #f1e3c4; }
   .pause-card .pause-keys { margin-top: 12px; font-size: .85rem; opacity: .7; }
-  /* Focus ring (which button Enter / Space presses): a gap and a blue ring that hug each button, as in Poop Runner 3D */
-  .pause-btns button:focus-visible { outline: none; box-shadow: 0 4px 0 #c94a1c, 0 0 0 3px #fffaf0, 0 0 0 6px #2f7dff; }
-  .pause-btns a:focus-visible { outline: none; box-shadow: 0 4px 0 #f1e3c4, 0 0 0 3px #fffaf0, 0 0 0 6px #2f7dff; }
-  .dead-menu:focus-visible { outline: none; box-shadow: 0 4px 0 #f1e3c4, 0 0 0 3px #fff, 0 0 0 6px #2f7dff; }
+  /* Focus ring (which button Enter / Space presses): a blue ring an even 3px out from the whole pill, including
+     its 4px raised bottom edge, as in Poop Runner 3D */
+  .pause-btns button, .pause-btns a { position: relative; }
+  .pause-btns button:focus-visible, .pause-btns a:focus-visible, .dead-menu:focus-visible { outline: none; }
+  .pause-btns button:focus-visible::after, .pause-btns a:focus-visible::after, .dead-menu:focus-visible::after {
+    content: ""; position: absolute; inset: -6px -6px -10px; border: 3px solid #2f7dff; border-radius: 999px; pointer-events: none;
+  }
   .pause-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px #2f7dff; }
   /* After a splat: a way back to the menu (the pause button has nothing to pause then) */
   .dead-menu {
