@@ -672,7 +672,7 @@
   let pausedAt = 0;
   const coarse = window.matchMedia('(pointer: coarse)').matches;   // touch screen: tap; otherwise keys and mouse
   const HINT_PLAY = coarse ? 'TAP to jump' : 'SPACE, ↑ or CLICK to jump · ESC to pause';
-  const HINT_DEAD = coarse ? 'TAP to try again' : 'SPACE or CLICK to try again';
+  const HINT_DEAD = coarse ? 'TAP to try again' : 'SPACE, ESC or CLICK to try again';
   let paused = false;
   let collisionLoop;
   let spawnTimer;
@@ -771,6 +771,7 @@
   document.addEventListener('keydown', (e) => {
     if (e.code === 'Escape' || e.code === 'KeyP') {
       e.preventDefault();
+      if (dead) { if (e.code === 'Escape') restart(); return; }   // on the splat screen Esc tries again
       if (paused) resume(); else pause();
       return;
     }
