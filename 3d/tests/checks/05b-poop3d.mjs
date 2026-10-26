@@ -3,8 +3,8 @@ export default async t => {
   await t.boot();
   const W = await t.eval("document.getElementById('view').width");
   // Brown pixels in the middle of the screen: count, distinct colours, brightness left vs right of their centre
-  const look = view => t.eval(`(() => {
-    __pr3d.clear('poops'); __pr3d.view(${view}); __pr3d.place('small', 16.5, 18.5); __pr3d.tick(0);
+  const look = (view, awake = true) => t.eval(`(() => {
+    __pr3d.clear('poops'); __pr3d.view(${view}); __pr3d.place('small', 16.5, 18.5, { awake: ${awake} }); __pr3d.tick(0);
     const pts = [];
     let white = 0;
     for (let y = 0; y < ${W * 0.625}; y++) for (let x = ${W / 2 - 100}; x < ${W / 2 + 100}; x++) {
@@ -27,4 +27,7 @@ export default async t => {
   const b = await look("16.5, 16.5, Math.PI / 2");
   t.assert(b.right > b.left * 1.08, `sun side (right) not brighter from the north: ${b.left.toFixed(0)} vs ${b.right.toFixed(0)}`);
   t.assert(b.white > 40, "no eyes facing you from the north: " + b.white);
+  // Asleep (not woken yet): eyes closed
+  const c = await look("16.5, 20.5, -Math.PI / 2", false);
+  t.assert(c.n > 2000 && c.white < a.white - 30, `sleeping poop's eyes not closed: ${c.white} white px (awake ${a.white})`);
 };

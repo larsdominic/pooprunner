@@ -1140,6 +1140,12 @@
     [0, 0.198, 0.135, 0.055, 0.02, 0.016, DARK, 0.1],
   ];
   const BROWS = [[-0.07, 0.15, 0.29, 0.05, 0.02, 0.014, DARK, 0.1, 0.45], [0.07, 0.15, 0.29, 0.05, 0.02, 0.014, DARK, 0.1, -0.45]];
+  // Asleep (not woken yet, so rolls just bounce off): closed eyes, a curved lid where each eye was
+  const ASLEEP = [
+    ...BODY.filter(([, , , , , , col]) => col !== WHITE && col !== BLACK),
+    [-0.065, 0.17, 0.215, 0.045, 0.014, 0.009, DARK, 0.1, 0.2], [0.065, 0.17, 0.215, 0.045, 0.014, 0.009, DARK, 0.1, -0.2],
+  ];
+  const BIG = [...BODY, ...BROWS], BIG_ASLEEP = [...ASLEEP, ...BROWS];
   const CROWN = [
     [0, 0, 0.41, 0.12, 0.12, 0.032, GOLD, 0.7], [0, 0.12, 0.41, 0.022, 0.012, 0.022, RED, 0.8], [0, -0.13, 0.2, 0.2, 0.06, 0.17, RED, 0.15],
     // five points, one at the front (+y faces you) and the rest mirrored left and right, so it sits straight
@@ -1165,8 +1171,8 @@
   }
   // rad / zc = bounding sphere (in model units) for the screen box
   const MODELS = {
-    small: { scale: 1, parts: BODY, flies: 2, rad: 0.3, zc: 0.25 },
-    big: { scale: 1.78, parts: [...BODY, ...BROWS], flies: 3, rad: 0.3, zc: 0.25 },
+    small: { scale: 1, parts: s => s.awake ? BODY : ASLEEP, flies: 2, rad: 0.3, zc: 0.25 },
+    big: { scale: 1.78, parts: s => s.awake ? BIG : BIG_ASLEEP, flies: 3, rad: 0.3, zc: 0.25 },
     king: { scale: 3.55, parts: [...BODY, ...BROWS, ...CROWN], flies: 4, rad: 0.3, zc: 0.25 },
     dog: { scale: 1, parts: dogParts, flies: 0, rad: 0.62, zc: 0.4 },
   };
@@ -1410,7 +1416,13 @@
     s.tex = s.dist < 0.5 ? null : ART.sprites.roll[(s.age * 24 | 0) % 4];
     if ((s.tailT += dt) >= 0.03 && s.dist > 0.8) { s.tailT = 0; effect("tail", ox, oy, s.z + 0.08); }
     const target = sprites.find(p => POOP[p.kind] && !p.gone && (p.x - s.x) ** 2 + (p.y - s.y) ** 2 < POOP[p.kind].hitR ** 2);
-    if (target) { s.gone = true; effect("puff", s.x, s.y, s.z - 0.1); hitPoop(target); }
+    if (target && !target.awake) {
+      // A sleeping poop can't be hit from afar: the roll bounces off with a boing, and wakes it up to come for you
+      s.gone = true; effect("puff", s.x, s.y, s.z - 0.1);
+      target.awake = true; target.cool = 0.6;
+      tone(180, 420, 0.18, "triangle", 0.1);
+      if (msgT < 1) setMsg("Boing! You woke it up!");
+    } else if (target) { s.gone = true; effect("puff", s.x, s.y, s.z - 0.1); hitPoop(target); }
     else if (solid(s.x, s.y)) { s.gone = true; effect("puff", ox, oy, s.z - 0.1); }
     else if (s.dist >= 14) { s.gone = true; effect("puff", s.x, s.y, s.z - 0.1); }
   }
@@ -1977,6 +1989,7 @@
         props: sprites.filter(s => PROPS.some(p => p[0] === s.kind)).length };
     },
     find: kind => sprites.filter(s => s.kind === kind).map(({ x, y, z }) => ({ x, y, z })),
+    awake: () => sprites.some(s => POOP[s.kind] && !s.gone && s.awake),
     set(o) { if ("rolls" in o) rolls = o.rolls; if ("stink" in o) stink = o.stink; if (o.win) end("win"); },
     place(kind, x, y, o = {}) {
       if (POOP[kind]) spawnPoop(kind, x, y, !!o.awake);
