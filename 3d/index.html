@@ -142,6 +142,49 @@
   }
   .panel .back:hover { border-color: var(--orange-hi); }
   .panel .keyhint { font-size: 13px; color: var(--muted); }
+
+  /* End screens: a badge with your face (crowned when you win, green when it's too stinky) and your results */
+  .ov-head { display: flex; align-items: center; gap: 14px; }
+  .ov-titles { display: grid; gap: 6px; min-width: 0; }
+  .badge { flex: none; position: relative; width: 68px; height: 68px; margin-top: 8px; }
+  .badge canvas { width: 100%; height: 100%; border-radius: 50%; background: #fff; border: 4px solid var(--cream-hi); box-sizing: border-box; }
+  .badge-top { position: absolute; left: 50%; top: -24px; transform: translateX(-50%) rotate(-10deg); font-size: 32px; line-height: 1; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chips span { padding: 5px 11px; border-radius: 999px; background: #fff; border: 2px solid var(--cream-hi); font-weight: 800; font-size: 14px; }
+
+  .overlay.win { background: radial-gradient(circle at 50% 45%, rgb(255 236 140 / .6), rgb(255 196 60 / .45)); }
+  .overlay.win .panel {
+    background: linear-gradient(#fff8dc, #ffe9a6);
+    border-color: #ffd34d;
+    box-shadow: 0 6px 0 #e0a800, 0 0 0 5px rgb(255 215 0 / .35), 0 16px 44px rgb(190 130 0 / .45);
+    animation: card-in .45s cubic-bezier(.2, 1.4, .4, 1) both;
+  }
+  @keyframes card-in { from { transform: translateY(40px) scale(.8); opacity: 0; } }
+  .overlay.win .panel h1 { color: #ffb800; text-shadow: 0 3px 0 #9a5f00; font-size: clamp(2.4rem, 8vw, 3.6rem); }
+  .overlay.win .eyebrow { color: #b07800; }
+  .overlay.win .badge canvas { border-color: #ffd34d; box-shadow: 0 0 0 4px rgb(255 215 0 / .4); }
+  .overlay.win .chips span { border-color: #ffd34d; }
+  .overlay.lose { background: rgb(150 190 90 / .5); }
+  .overlay.lose .badge canvas { filter: sepia(.9) hue-rotate(45deg) saturate(2.4); border-color: var(--stink); }
+  .overlay.lose .panel h1 { color: #6aa82e; text-shadow: 0 3px 0 var(--poop); }
+
+  /* Beating King Poop: a flash, a bouncing banner and confetti, before the win card */
+  .victory { position: absolute; inset: 0; z-index: 4; display: grid; place-items: center; pointer-events: none; text-align: center; }
+  .victory::before { content: ""; position: absolute; inset: 0; background: #fff; animation: v-flash .6s ease-out both; }
+  @keyframes v-flash { from { opacity: .9; } to { opacity: 0; } }
+  .victory div { position: relative; display: grid; justify-items: center; animation: v-pop .7s cubic-bezier(.2, 1.6, .4, 1) .15s both; }
+  .victory b {
+    font: 900 clamp(2.2rem, 8vw, 4.6rem)/1 var(--display); color: #ffd23a; text-transform: uppercase;
+    text-shadow: 0 4px 0 #9a5f00, 0 0 28px rgb(255 220 80 / .9), 0 0 4px #000;
+  }
+  .v-crown { font-size: clamp(3rem, 12vw, 6rem); line-height: 1; animation: v-bob .6s ease-in-out .85s infinite alternate; }
+  @keyframes v-pop { from { transform: scale(.2) rotate(-12deg); opacity: 0; } }
+  @keyframes v-bob { to { transform: translateY(-10px) rotate(8deg); } }
+  .confetti { position: absolute; inset: 0; z-index: 5; overflow: hidden; pointer-events: none; }
+  .confetti.behind { z-index: auto; }   /* once the win card is up, it falls behind the card */
+  .confetti i { position: absolute; top: -16px; width: 9px; height: 14px; border-radius: 2px; animation: confetti-fall linear infinite; }
+  @keyframes confetti-fall { to { transform: translateY(calc(100vh + 32px)) rotate(900deg); } }
+  @media (prefers-reduced-motion: reduce) { .confetti, .victory div, .victory::before { animation: none; } .confetti { display: none; } }
   .panel .back:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
   .panel button:focus-visible, .pick button:focus-visible, .easy input:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
 
@@ -298,6 +341,10 @@
     .overlay { padding: 8px; }
     .panel { gap: 6px; padding: 10px 14px; max-width: 34rem; }
     .panel h1 { font-size: 1.6rem; }
+    .overlay.win .panel h1 { font-size: 2rem; }
+    .badge { width: 50px; height: 50px; margin-top: 6px; }
+    .badge-top { top: -18px; font-size: 24px; }
+    .chips span { padding: 3px 9px; font-size: 12px; }
     .panel p { font-size: 12px; line-height: 1.35; }
     .eyebrow, .keys { display: none; }
     .pick img { width: 34px; height: 34px; }
@@ -334,10 +381,18 @@
     <button class="fire-btn" id="fire-btn" type="button">Throw</button>
     <button class="pause-btn" id="pause-btn" type="button" aria-label="Pause">II</button>
   </div>
+  <div class="victory" id="victory" hidden><div><span class="v-crown">👑</span><b>King Poop<br>defeated!</b></div></div>
+  <div class="confetti" id="confetti" aria-hidden="true"></div>
   <div class="overlay" id="overlay">
     <div class="panel">
-      <p class="eyebrow" id="ov-eyebrow">Dog park · Saturday</p>
-      <h1 id="ov-title">Pooprunner 3D</h1>
+      <div class="ov-head">
+        <div class="badge" id="ov-badge" hidden><canvas id="ov-face" width="96" height="96"></canvas><span class="badge-top" id="ov-badge-top"></span></div>
+        <div class="ov-titles">
+          <p class="eyebrow" id="ov-eyebrow">Dog park · Saturday</p>
+          <h1 id="ov-title">Pooprunner 3D</h1>
+        </div>
+      </div>
+      <div class="chips" id="ov-chips" hidden></div>
       <p id="ov-text">Somebody's dogs left 18 poops all over the park. Blast them with toilet paper before the stink gets you.</p>
       <div class="who" id="who">
         <div class="pick" role="group" aria-label="Who's playing?">
@@ -1443,8 +1498,42 @@
     sfxPop();
     if (p.kind === "king") {
       for (let i = 0; i < 5; i++) effect("poof", p.x + Math.cos(i * 1.26) * 0.7, p.y + Math.sin(i * 1.26) * 0.7, 0.3 + (i % 2) * 0.4);
-      end("win");
+      celebrate(p.x, p.y);
     }
+  }
+  // Beating King Poop: about three seconds of celebration before the win card. Your controls stop; the view turns to
+  // where he was, puffs burst there like fireworks, a banner bounces in, confetti falls and a fanfare plays.
+  const VICTORY_T = 2.8;
+  let victory = null;
+  function celebrate(x, y) {
+    running = false; trigger = false; keys.clear(); setMsg("");
+    phase = "victory"; victory = { t: 0, x, y, next: 0 };
+    $("touch-ui").hidden = true;
+    $("victory").hidden = false;
+    confetti(true); $("confetti").classList.remove("behind");
+    [523, 659, 784, 1047, 784, 1047].forEach((f, i) => setTimeout(() => tone(f, f, i === 5 ? 0.5 : 0.14, "square", 0.07), i * 140));
+  }
+  function updateVictory(dt) {
+    const v = victory;
+    v.t += dt;
+    const want = Math.atan2(v.y - py, v.x - px), now = Math.atan2(dy, dx);
+    rotate(Math.atan2(Math.sin(want - now), Math.cos(want - now)) * Math.min(1, dt * 3));
+    if ((v.next -= dt) <= 0) {
+      v.next = 0.22;
+      const a = Math.random() * Math.PI * 2, r = 0.3 + Math.random() * 1.2;
+      effect("poof", v.x + Math.cos(a) * r, v.y + Math.sin(a) * r, 0.4 + Math.random() * 1.4);
+      tone(700 + Math.random() * 500, 1600, 0.12, "triangle", 0.04);
+    }
+    for (const s of sprites) {
+      if (s.gone) continue;
+      if (s.kind === "dog") updateDog(s, dt);
+      else if (FX[s.kind]) {
+        s.age += dt;
+        if (s.age >= FX[s.kind]) s.gone = true;
+        else s.tex = ART.sprites[s.kind][(s.age / FX[s.kind] * 3) | 0];
+      }
+    }
+    if (v.t >= VICTORY_T) { victory = null; phase = "play"; end("win"); }
   }
   function addStink(n) {
     if (over) return;
@@ -1620,7 +1709,34 @@
 
   const overlay = $("overlay");
   let overlayAt = 0;
-  function showOverlay(eyebrow, title, text, btn, titleScreen = false, menu = false) {
+  // Confetti over the game: coloured pieces drifting down at random speeds; cleared when the next game starts
+  function confetti(on) {
+    const box = $("confetti");
+    if (!on) { box.replaceChildren(); return; }
+    if (box.childElementCount) return;
+    const cols = ["#ff5a5a", "#ffd23a", "#4fc3ff", "#7ee36a", "#ff8be0", "#ffffff", "#ffb04a"];
+    box.replaceChildren(...Array.from({ length: 60 }, (_, i) => {
+      const p = document.createElement("i");
+      p.style.left = `${Math.random() * 100}%`;
+      p.style.background = cols[i % cols.length];
+      p.style.animationDuration = `${2.6 + Math.random() * 2.4}s`;
+      p.style.animationDelay = `${-Math.random() * 5}s`;
+      return p;
+    }));
+  }
+  function showOverlay(eyebrow, title, text, btn, titleScreen = false, menu = false, mood = "", chips = []) {
+    overlay.classList.toggle("win", mood === "win"); overlay.classList.toggle("lose", mood === "lose");
+    $("ov-badge").hidden = !mood;
+    if (mood) {
+      const g = $("ov-face").getContext("2d"), { img, crop: [sx, sy, sw, sh] } = FACES[kid];
+      g.clearRect(0, 0, 96, 96); g.drawImage(img, sx, sy, sw, sh, 0, 0, 96, 96);
+      $("ov-badge-top").textContent = mood === "win" ? "👑" : "💨";
+    }
+    $("ov-chips").hidden = !chips.length;
+    $("ov-chips").replaceChildren(...chips.map(c => Object.assign(document.createElement("span"), { textContent: c })));
+    confetti(mood === "win");
+    $("confetti").classList.toggle("behind", mood === "win");
+    $("victory").hidden = true;
     document.querySelector(".pick").hidden = document.querySelector(".easy").hidden = !titleScreen;
     $("ov-menu").hidden = !menu;
     $("ov-keys").hidden = coarse || btn !== "Resume";
@@ -1637,8 +1753,15 @@
     over = kind; running = false; trigger = false; keys.clear(); setMsg("");
     if (document.pointerLockElement) document.exitPointerLock();
     const t = `${Math.floor(elapsed / 60)}:${String(Math.floor(elapsed % 60)).padStart(2, "0")}`;
-    if (kind === "win") showOverlay("Hooray!", "Park clean!", `All ${POOPS.length} poops and King Poop cleared in ${t}, with ${Math.round(stink)}% stink.`, "Play again", true, true);
-    if (kind === "lose") showOverlay("Pee-yew!", "Too stinky!", `${Math.max(0, POOPS.length - poopsLeft())} of ${POOPS.length} poops cleaned after ${t}. Grab air fresheners and keep moving!`, "Try again", true, true);
+    if (kind === "win") {
+      showOverlay("King Poop defeated", "You won!", `King Poop is beaten and all ${POOPS.length} poops are cleaned up. The park is clean!`, "Play again", true, true, "win",
+        [`⏱ ${t}`, `💨 ${Math.round(stink)}% stink`, `🧻 ${rolls} rolls left`]);
+    }
+    if (kind === "lose") {
+      showOverlay("Pee-yew!", "Too stinky!", "Grab air fresheners and keep moving!", "Try again", true, true, "lose",
+        [`🧹 ${Math.max(0, POOPS.length - poopsLeft())} of ${POOPS.length} cleaned`, `⏱ ${t}`]);
+      [392, 370, 349, 294].forEach((f, i) => setTimeout(() => tone(f, f * 0.97, i === 3 ? 0.6 : 0.28, "triangle", 0.09), i * 300));
+    }
   }
   function pause() {
     if (!running) return;
@@ -1651,6 +1774,7 @@
     if (!started || over) init();
     started = true;
     overlay.hidden = true;
+    confetti(false); $("victory").hidden = true; victory = null;
     play();
     lockPointer();
   }
@@ -1823,6 +1947,7 @@
     last = now;
     if (ready && !hold) {
       if (running) update(dt);
+      else if (victory) updateVictory(dt);
       else if (!started) rotate(dt * 0.12); // slow pan behind the title screen
       animate(dt);
     }
@@ -1866,7 +1991,7 @@
     },
     view,
     tick(sec) {
-      for (let i = 0, n = Math.round(sec * 60); i < n && running; i++) { update(1 / 60); animate(1 / 60); }
+      for (let i = 0, n = Math.round(sec * 60); i < n && (running || victory); i++) { if (running) update(1 / 60); else updateVictory(1 / 60); animate(1 / 60); }
       render();
     },
     pixel(x, y) { const c = buf[(y | 0) * W + (x | 0)]; return [c & 255, (c >> 8) & 255, (c >> 16) & 255]; },

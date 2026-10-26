@@ -21,19 +21,27 @@ export default async (t, o) => {
 
   // 20 rolls beat him
   await t.eval("__pr3d.clear('cloud'), __pr3d.set({ rolls: 99 })");
-  for (let i = 0; i < 26 && !(await st()).over; i++) {
+  for (let i = 0; i < 26 && !(await st()).over && (await st()).phase !== "victory"; i++) {
     await t.eval(`(() => { const s = __pr3d.state; __pr3d.view(s.px, s.py, Math.atan2(s.king.y - s.py, s.king.x - s.px)); __pr3d.set({ stink: 0 }); })()`);
     await shoot(); await t.eval("__pr3d.tick(0.4)");
   }
+  // Beating him starts the celebration (banner, confetti, controls off), then the win card
   s = await st();
-  t.assert(s.over === "win", "not won after the rolls: " + s.over + " king " + JSON.stringify(s.king));
-  t.assert(await t.eval("document.getElementById('ov-title').textContent") === "Park clean!", "win title wrong");
+  t.assert(s.phase === "victory" && !s.running && !s.over, `no celebration after the last roll: phase ${s.phase}, over ${s.over}, king ${JSON.stringify(s.king)}`);
+  t.assert(!(await t.eval("document.getElementById('victory').hidden")), "no victory banner");
+  t.assert(await t.eval("document.getElementById('overlay').hidden"), "win card showed straight away");
+  await t.eval("__pr3d.tick(3.2)");
+  s = await st();
+  t.assert(s.over === "win", "not won after the celebration: " + s.over);
+  t.assert(await t.eval("document.getElementById('confetti').childElementCount") > 0, "no confetti on the win card");
+  t.assert(await t.eval("document.getElementById('ov-title').textContent") === "You won!", "win title wrong");
   t.assert(!(await t.eval("document.getElementById('ov-menu').hidden")), "no Back to menu on the win screen");
-  t.assert(/\d+:\d\d/.test(await t.eval("document.getElementById('ov-text').textContent")), "win text has no time");
+  t.assert(/\d+:\d\d/.test(await t.eval("document.getElementById('ov-chips').textContent")), "win card has no time");
 
   // Review Focus 2: Play again resets everything
   await t.eval("document.getElementById('ov-btn').click()");
   await t.eval("__pr3d.hold(true)");
+  t.assert(await t.eval("document.getElementById('confetti').childElementCount") === 0, "confetti still falling after Play again");
   s = await st();
   const want = { stink: 0, rolls: 30, poopsLeft: 18, king: null, flowers: 0, splat: 0, over: null, msg: "" };
   for (const [k, v] of Object.entries(want)) t.assert(JSON.stringify(s[k]) === JSON.stringify(v), `after Play again ${k} = ${JSON.stringify(s[k])}`);
