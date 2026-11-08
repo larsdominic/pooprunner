@@ -132,5 +132,18 @@
       <span class="play">Play 3D</span>
     </a>
   </main>
+<script>
+  // Links between the menu and the games always fetch the latest page: phones (Chrome on iPhone especially) can keep
+  // opening an old saved copy for a while after an update, so add a fresh ?v= to the address when a link is followed.
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a[href]');
+    if (!a || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || a.target) return;
+    const u = new URL(a.href, location.href);
+    if (u.origin !== location.origin || !/^https?:$/.test(u.protocol)) return;
+    e.preventDefault();
+    u.searchParams.set('v', Date.now().toString(36));
+    location.href = u.href;
+  });
+</script>
 </body>
 </html>
