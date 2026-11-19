@@ -319,8 +319,7 @@
     font: 800 13px/1 var(--ui);
     touch-action: none;
   }
-  /* thumbs miss: the button also takes taps in a ring around it */
-  .fire-btn::before { content: ""; position: absolute; inset: -20px; border-radius: 50%; }
+  .fire-btn.down { background: rgb(240 138 36 / .95); transform: scale(.94); }   /* shows that the touch was taken */
   .joy {
     position: absolute;
     width: 96px; height: 96px;
@@ -1037,6 +1036,7 @@
   // ---------- Game state ----------
   let px, py, dx, dy, plx, ply, sprites = [];
   let rolls, stink, splat, recoil, bob, moveAmt, cooldown, msgT, elapsed, clock = 0, easy = false;
+  let lastTouch = -1e9;      // when a finger last touched the screen (ms)
   const SHOT_MEMORY = 0.4;   // seconds a throw press is remembered (see the throw line in the game loop)
   let running = false, started = false, over = null, showMap = true, trigger = false, shot = 0, hold = false, phase = "title";
 
@@ -1913,6 +1913,7 @@
   addEventListener("blur", () => { keys.clear(); trigger = false; shot = 0; });
   cv.addEventListener("mousedown", e => {
     if (!running || e.button !== 0) return;
+    if (performance.now() - lastTouch < 1000) return;   // the pretend mouse click a phone sends after a tap: not a throw
     if (document.pointerLockElement !== cv) lockPointer();
     trigger = true; shot = SHOT_MEMORY;
   });
@@ -1951,13 +1952,24 @@
   };
   stage.addEventListener("pointerup", endTouch);
   stage.addEventListener("pointercancel", endTouch);
-  // Capture the pointer so lifting the thumb anywhere (even off the button) stops throwing
-  fireBtn.addEventListener("pointerdown", e => {
-    e.preventDefault();
-    fireBtn.setPointerCapture(e.pointerId);
-    if (running) { trigger = true; shot = SHOT_MEMORY; }
-  });
-  for (const ev of ["pointerup", "pointercancel", "lostpointercapture"]) fireBtn.addEventListener(ev, () => { trigger = false; });
+  // Throw: a touch counts when it lands on the button's circle (plus a thumb-sized ring), wherever the button is on
+  // screen at that moment. Measured from the touch position on every tap rather than left to the browser to match the
+  // touch to the button: on phones the page can shift under the finger (bars sliding, Chrome on iPhone drawing wider
+  // than the page), and then the button's tappable area and its picture no longer line up.
+  const FIRE_RING = 24;     // px around the button that still count
+  let firePtr = null;       // the finger on Throw; lifting it anywhere stops throwing
+  addEventListener("pointerdown", e => {
+    if (e.pointerType === "touch") lastTouch = performance.now();
+    const b = fireBtn.getBoundingClientRect();
+    if (!running || !b.width) return;
+    if (Math.hypot(e.clientX - (b.left + b.width / 2), e.clientY - (b.top + b.height / 2)) > b.width / 2 + FIRE_RING) return;
+    e.preventDefault(); e.stopPropagation();   // not also a turn or a move
+    firePtr = e.pointerId; trigger = true; shot = SHOT_MEMORY; fireBtn.classList.add("down");
+  }, true);
+  for (const ev of ["pointerup", "pointercancel"]) addEventListener(ev, e => {
+    if (e.pointerType === "touch") lastTouch = performance.now();
+    if (e.pointerId === firePtr) { firePtr = null; trigger = false; fireBtn.classList.remove("down"); }
+  }, true);
   fireBtn.addEventListener("contextmenu", e => e.preventDefault());
   $("pause-btn").addEventListener("click", pause);
 

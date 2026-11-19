@@ -32,6 +32,20 @@ export default async (t, o) => {
     await t.eval("__pr3d.tick(0.05)");
     await t.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
     t.assert((await t.eval("__pr3d.state")).rolls === 29, "Throw button did not throw: rolls " + (await t.eval("__pr3d.state")).rolls);
+    // The Throw area is the button's circle plus a thumb-sized ring, measured where the button is at the tap
+    const fr = await t.eval("document.getElementById('fire-btn').getBoundingClientRect().width / 2");
+    const tapAt = async (dx, dy) => {
+      await t.eval("__pr3d.tick(1)");
+      const before = (await t.eval("__pr3d.state")).rolls;
+      await t.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: r[0] + dx, y: r[1] + dy, id: 1 }] });
+      await t.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+      await t.eval("__pr3d.tick(0.05)");
+      return before - (await t.eval("__pr3d.state")).rolls;
+    };
+    t.assert(await tapAt(-(fr - 4), 0) === 1, "a tap on the button's left edge did not throw");
+    t.assert(await tapAt(0, -(fr + 15)) === 1, "a tap just above the button (inside the ring) did not throw");
+    t.assert(await tapAt(-(fr + 60), 0) === 0, "a tap well left of the button threw");
+    t.assert(await tapAt(0, -(fr + 60)) === 0, "a tap well above the button threw");
 
     // Pause offers a way back to the game menu, on screen; the Resume screen goes back to play
     t.assert(await t.eval("document.getElementById('ov-menu').hidden"), "Back to menu showing while playing");
