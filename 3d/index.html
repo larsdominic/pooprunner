@@ -319,6 +319,8 @@
     font: 800 13px/1 var(--ui);
     touch-action: none;
   }
+  /* thumbs miss: the button also takes taps in a ring around it */
+  .fire-btn::before { content: ""; position: absolute; inset: -20px; border-radius: 50%; }
   .joy {
     position: absolute;
     width: 96px; height: 96px;
@@ -1035,7 +1037,8 @@
   // ---------- Game state ----------
   let px, py, dx, dy, plx, ply, sprites = [];
   let rolls, stink, splat, recoil, bob, moveAmt, cooldown, msgT, elapsed, clock = 0, easy = false;
-  let running = false, started = false, over = null, showMap = true, trigger = false, hold = false, phase = "title";
+  const SHOT_MEMORY = 0.4;   // seconds a throw press is remembered (see the throw line in the game loop)
+  let running = false, started = false, over = null, showMap = true, trigger = false, shot = 0, hold = false, phase = "title";
 
   function view(x, y, a) { px = x; py = y; dx = Math.cos(a); dy = Math.sin(a); plx = -dy * PLANE; ply = dx * PLANE; }
 
@@ -1081,7 +1084,7 @@
   function init() {
     view(...START);
     rolls = 30; kingOut = false;
-    stink = splat = recoil = bob = moveAmt = cooldown = msgT = elapsed = 0;
+    stink = splat = recoil = bob = moveAmt = cooldown = msgT = elapsed = shot = 0;
     easy = $("easy").checked;
     over = null;
     sprites = PROPS.map(([kind, x, y]) => ({ kind, x: x + 0.5, y: y + 0.5, z: 0, tex: ART.sprites[kind], solid: SOLID_PROPS[kind] }));
@@ -1575,7 +1578,7 @@
   const VICTORY_T = 2.8;
   let victory = null;
   function celebrate(x, y) {
-    running = false; trigger = false; keys.clear(); setMsg("");
+    running = false; trigger = false; shot = 0; keys.clear(); setMsg("");
     phase = "victory"; victory = { t: 0, x, y, next: 0 };
     $("touch-ui").hidden = true;
     $("victory").hidden = false;
@@ -1697,7 +1700,10 @@
     moveAmt += ((len > 0.1 ? 1 : 0) - moveAmt) * Math.min(1, dt * 8);
     if (len > 0.1) bob += dt * 9;
 
-    if (trigger && cooldown <= 0) fire();
+    // A press is remembered for a moment (shot): a quick tap that starts and ends between two frames, or lands while
+    // the last throw is still reloading, still throws once
+    shot = Math.max(0, shot - dt);
+    if ((trigger || shot > 0) && cooldown <= 0) { fire(); shot = 0; }
 
     for (const s of sprites) {
       if (s.gone) continue;
@@ -1819,7 +1825,7 @@
     $("ov-btn").focus({ preventScroll: true });
   }
   function end(kind) {
-    over = kind; running = false; trigger = false; keys.clear(); setMsg("");
+    over = kind; running = false; trigger = false; shot = 0; keys.clear(); setMsg("");
     if (document.pointerLockElement) document.exitPointerLock();
     const t = `${Math.floor(elapsed / 60)}:${String(Math.floor(elapsed % 60)).padStart(2, "0")}`;
     if (kind === "win") {
@@ -1834,7 +1840,7 @@
   }
   function pause() {
     if (!running) return;
-    running = false; trigger = false; keys.clear();
+    running = false; trigger = false; shot = 0; keys.clear();
     showOverlay("Paused", "Pooprunner 3D", `${POOPS.length - poopsLeft()} of ${POOPS.length} poops cleaned · stink ${Math.round(stink)}% · ${rolls} rolls`, "Resume", false, true);
   }
   function start() {
@@ -1901,14 +1907,14 @@
     }
     if (!running) return;
     keys.add(e.code);
-    if (e.code === "Space") trigger = true;
+    if (e.code === "Space") { trigger = true; if (!e.repeat) shot = SHOT_MEMORY; }
   });
   addEventListener("keyup", e => { keys.delete(e.code); if (e.code === "Space") trigger = false; });
-  addEventListener("blur", () => { keys.clear(); trigger = false; });
+  addEventListener("blur", () => { keys.clear(); trigger = false; shot = 0; });
   cv.addEventListener("mousedown", e => {
     if (!running || e.button !== 0) return;
     if (document.pointerLockElement !== cv) lockPointer();
-    trigger = true;
+    trigger = true; shot = SHOT_MEMORY;
   });
   addEventListener("mouseup", () => { trigger = false; });
   addEventListener("mousemove", e => { if (running && document.pointerLockElement === cv) mouseDX += e.movementX; });
@@ -1949,7 +1955,7 @@
   fireBtn.addEventListener("pointerdown", e => {
     e.preventDefault();
     fireBtn.setPointerCapture(e.pointerId);
-    if (running) trigger = true;
+    if (running) { trigger = true; shot = SHOT_MEMORY; }
   });
   for (const ev of ["pointerup", "pointercancel", "lostpointercapture"]) fireBtn.addEventListener(ev, () => { trigger = false; });
   fireBtn.addEventListener("contextmenu", e => e.preventDefault());

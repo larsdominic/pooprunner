@@ -54,4 +54,20 @@ export default async t => {
   await t.eval("__pr3d.tick(0.1)");
   t.assert(await rollY() < before - 0.5, "roll did not continue after resume");
   t.assert((await st()).rolls === 9, "rolls changed by more than one shot: " + (await st()).rolls);
+
+  // Quick taps are remembered: a press that starts and ends before the next frame still throws once
+  await t.eval("__pr3d.tick(2)");
+  let r = (await st()).rolls;
+  await t.key("Space"); await t.key("Space", false);
+  await t.eval("__pr3d.tick(1 / 60)");
+  t.assert((await st()).rolls === r - 1, "a quick tap between two frames threw nothing");
+  // ...and a tap while the last throw is still reloading is thrown as soon as it can be, once
+  await t.eval("__pr3d.tick(0.1)");
+  await t.key("Space"); await t.key("Space", false);
+  await t.eval("__pr3d.tick(0.1)");
+  t.assert((await st()).rolls === r - 1, "threw again inside the cooldown");
+  await t.eval("__pr3d.tick(0.2)");
+  t.assert((await st()).rolls === r - 2, "a tap during the reload was lost");
+  await t.eval("__pr3d.tick(1.5)");
+  t.assert((await st()).rolls === r - 2, "a remembered tap threw more than once");
 };

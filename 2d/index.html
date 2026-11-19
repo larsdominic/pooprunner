@@ -843,17 +843,24 @@
   function triggerJump() {
     if (paused) return;
     if (dead) return restart();
-    if (jumping) return;
+    // A tap while still in the air is remembered: if it came just before landing, the kid jumps again on landing
+    if (jumping) { jumpTapAt = performance.now(); return; }
     jumping = true;
     sfx('jump');
+    wrapper.classList.remove('jumping');
+    void wrapper.offsetWidth;            // so a jump straight after a landing starts a fresh arc
     wrapper.classList.add('jumping');
-    wrapper.addEventListener('animationend', (ev) => {
-      if (ev.animationName === 'jumpArc') {
-        wrapper.classList.remove('jumping');
-        jumping = false;
-      }
-    }, { once: true });
   }
+  let jumpTapAt = 0;
+  const JUMP_MEMORY = 250;   // ms before landing in which a tap still counts
+  // One listener for every landing (a one-off listener could be used up by another animation ending and leave the kid
+  // "still jumping", deaf to taps)
+  wrapper.addEventListener('animationend', (ev) => {
+    if (ev.target !== wrapper || ev.animationName !== 'jumpArc') return;
+    wrapper.classList.remove('jumping');
+    jumping = false;
+    if (!dead && !paused && performance.now() - jumpTapAt < JUMP_MEMORY) triggerJump();
+  });
 
   function getRect(el) {
     return el.getBoundingClientRect();
@@ -1024,6 +1031,9 @@
 
   function restart() {
     dead = false;
+    // splatted in mid-air: the jump never finished, so end it here (taps would be ignored otherwise)
+    jumping = false; jumpTapAt = 0;
+    wrapper.classList.remove('jumping');
     clearAt = 0;
     document.body.classList.remove('dead');
     document.getElementById('dead-menu').hidden = true;
