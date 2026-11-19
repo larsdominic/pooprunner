@@ -310,8 +310,11 @@
   .touch-ui[hidden] { display: none !important; }
   .fire-btn {
     position: absolute;
-    right: 18px; bottom: 18px;
-    width: 78px; height: 78px;
+    /* Kept away from the screen's edges, where phones keep touches for themselves (the swipe-home bar along the
+       bottom, back/forward swipes at the sides). --edge-right is the part of the screen on the right that lies outside
+       the page (Chrome on iPhone, measured in placeHud): touches there may never reach the game. */
+    right: calc(22px + var(--edge-right, 0px)); bottom: calc(26px + env(safe-area-inset-bottom, 0px));
+    width: 86px; height: 86px;
     border-radius: 50%;
     border: 3px solid #fff;
     background: rgb(240 138 36 / .75);
@@ -396,7 +399,7 @@
        of it. (Pinned, because Chrome on iPhone makes the page itself narrower than the screen it can draw on.) */
     body { position: fixed; inset: 0; height: auto; padding: 0; gap: 0; }
     .pause-btn { left: calc(10px + env(safe-area-inset-left, 0px)); }
-    .fire-btn { right: calc(18px + env(safe-area-inset-right, 0px)); }
+    .fire-btn { right: calc(22px + env(safe-area-inset-right, 0px) + var(--edge-right, 0px)); }
     .stage { border-radius: 0; box-shadow: none; }
     .hud {
       position: fixed; z-index: 3;
@@ -1052,6 +1055,7 @@
     // the bar is pinned to the screen, and so is the page body when the bar floats: measure from the body's right edge
     // (in Chrome on iPhone the page is narrower than the screen, which put the bar over the map)
     const vw = Math.max(document.documentElement.clientWidth, document.body.getBoundingClientRect().right);
+    document.documentElement.style.setProperty("--edge-right", `${Math.max(0, Math.round(vw - document.documentElement.clientWidth))}px`);
     if (!r.width || !r.height) return;
     const k = Math.min(r.width / W, r.height / H), picRight = r.left + (r.width + W * k) / 2, picTop = r.top + (r.height - H * k) / 2;
     const mapLeft = picRight - (MW * Math.round(H / 133) + 6) * k;
