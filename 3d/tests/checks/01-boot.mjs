@@ -1,6 +1,6 @@
 // The page loads offline, is called Pooprunner 3D, starts, and the test hook can step it
 export default async t => {
-  t.assert(await t.eval("document.title") === "Pooprunner 3D", "title is not Pooprunner 3D");
+  t.assert((await t.eval("document.title")).startsWith("Poop Runner 3D"), "title does not start with Poop Runner 3D");   // the full title carries a search description
   t.assert(await t.eval(`/^data:/.test(document.querySelector('link[rel="icon"]')?.href || "")`), "no inline tab icon (browser would ask the server for favicon.ico)");
   await t.boot();
   t.assert(await t.eval("__pr3d.state.running") === true, "game not running after start");

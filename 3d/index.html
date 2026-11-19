@@ -21,8 +21,8 @@
 <meta name="twitter:card" content="summary_large_image">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "VideoGame", "name": "Poop Runner 3D", "url": "https://pooprunner.lol/3d/", "description": "Blast the poops in the dog park with a toilet-paper blaster before the stink gets you, then beat King Poop. A free, silly 3D browser game for kids.", "genre": "Action", "gamePlatform": "Web browser", "applicationCategory": "Game", "operatingSystem": "Any", "playMode": "SinglePlayer", "inLanguage": "en", "isFamilyFriendly": true, "image": "https://pooprunner.lol/og.jpg", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}}</script>
 <!-- Icon as real files: search results and home screens can't use the inline one below -->
-<link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="../favicon.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%235fb4ff'/%3E%3Cellipse cx='32' cy='50' rx='22' ry='8' fill='%235e3511'/%3E%3Cellipse cx='32' cy='47' rx='21' ry='8' fill='%237a4a1e'/%3E%3Cellipse cx='32' cy='36' rx='15' ry='7' fill='%237a4a1e'/%3E%3Cellipse cx='32' cy='26' rx='9' ry='6' fill='%237a4a1e'/%3E%3Cpath d='M30 21q6-9 2-11' stroke='%237a4a1e' stroke-width='5' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='27' cy='38' r='3.5' fill='white'/%3E%3Ccircle cx='37' cy='38' r='3.5' fill='white'/%3E%3Ccircle cx='27.8' cy='38.5' r='1.6'/%3E%3Ccircle cx='37.8' cy='38.5' r='1.6'/%3E%3C/svg%3E">
 <style>
   /* Layout: full-height game view, letterboxed, with a sunny status bar underneath */
@@ -391,7 +391,11 @@
   /* Phones sideways: the game fills the whole screen, with the status bar floating over the top of the view
      (clear of the pause button on the left and the map on the right) */
   @media (max-height: 480px) and (orientation: landscape) {
-    body { padding: 0 env(safe-area-inset-right, 0px) 0 env(safe-area-inset-left, 0px); gap: 0; }
+    /* Pinned to the whole screen, no side strips: the picture runs under the camera notch, only the buttons keep clear
+       of it. (Pinned, because Chrome on iPhone makes the page itself narrower than the screen it can draw on.) */
+    body { position: fixed; inset: 0; height: auto; padding: 0; gap: 0; }
+    .pause-btn { left: calc(10px + env(safe-area-inset-left, 0px)); }
+    .fire-btn { right: calc(18px + env(safe-area-inset-right, 0px)); }
     .stage { border-radius: 0; box-shadow: none; }
     .hud {
       position: fixed; z-index: 3;
@@ -1041,20 +1045,23 @@
   // Place it from where the picture and the map really are on screen (browser bars and side toolbars can make
   // the screen's own measurements wrong, especially just after the page opens).
   function placeHud() {
-    const r = cv.parentElement.getBoundingClientRect(), vw = document.documentElement.clientWidth;
+    const r = cv.parentElement.getBoundingClientRect(), pb = document.getElementById("pause-btn").getBoundingClientRect();
+    // the bar is pinned to the screen, and so is the page body when the bar floats: measure from the body's right edge
+    // (in Chrome on iPhone the page is narrower than the screen, which put the bar over the map)
+    const vw = Math.max(document.documentElement.clientWidth, document.body.getBoundingClientRect().right);
     if (!r.width || !r.height) return;
     const k = Math.min(r.width / W, r.height / H), picRight = r.left + (r.width + W * k) / 2, picTop = r.top + (r.height - H * k) / 2;
     const mapLeft = picRight - (MW * Math.round(H / 133) + 6) * k;
     const root = document.documentElement.style;
     root.setProperty("--hud-top", `${Math.round(picTop + 6)}px`);
-    root.setProperty("--hud-left", `${Math.round(r.left + 58)}px`);
+    root.setProperty("--hud-left", `${Math.round(pb.width ? pb.right + 8 : r.left + 58)}px`);   // right of the pause button
     root.setProperty("--hud-right", `${Math.max(0, Math.round(vw - mapLeft + 8))}px`);
   }
   function fit() {
     const r = cv.parentElement.getBoundingClientRect();
     placeHud();
     if (!r.width || !r.height) return;
-    const w = Math.round(H * Math.min(2.4, Math.max(1.25, r.width / r.height)) / 2) * 2;
+    const w = Math.round(H * Math.min(2.7, Math.max(1.25, r.width / r.height))   /* 2.7: a phone held sideways is filled right to both edges */ / 2) * 2;
     if (w === W) return;
     W = w; PLANE = 0.66 * W / (1.6 * H);
     sizeCanvas();
