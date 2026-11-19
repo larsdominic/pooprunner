@@ -41,12 +41,19 @@
   @keyframes drift { from { left: -200px; } to { left: 110%; } }
 
   h1 {
-    margin-top: 40px; font-size: clamp(2.2rem, 8vw, 4rem); color: #fff; text-align: center; line-height: 1.05;
-    text-shadow: 3px 3px 0 rgba(0, 0, 0, .25);
+    /* PoopMatch's lettering: white, fat, with a dark outline and a drop */
+    margin-top: 40px; font-family: "Titan One", "Arial Rounded MT Bold", system-ui, sans-serif; font-weight: 400;
+    font-size: clamp(2.6rem, 9vw, 5rem); color: #fff; text-align: center; line-height: 1.05; letter-spacing: .02em;
+    -webkit-text-stroke: .14em #0A1020; paint-order: stroke fill; text-shadow: 0 .09em 0 #0A1020;
     animation: wobble 1.2s ease-in-out infinite;
   }
   @keyframes wobble { 0%, 100% { transform: rotate(-2deg); } 50% { transform: rotate(2deg); } }
-  .sub { margin: 10px 0 34px; color: #fff; font-weight: bold; font-size: 1.1rem; text-shadow: 1px 1px 3px rgba(0, 0, 0, .35); text-align: center; }
+  /* a tilted gold sticker, like the cards' corner tags */
+  .sub {
+    margin: 14px 0 38px; padding: 6px 18px; text-align: center;
+    font-family: "Nunito", ui-rounded, "Arial Rounded MT Bold", system-ui, sans-serif; font-weight: 800; font-size: 1.25rem; color: #0A1020;
+    background: #FFC62E; border: 3px solid #0A1020; border-radius: 14px; box-shadow: 0 5px 0 #0A1020; transform: rotate(-3deg);
+  }
 
   .games { display: grid; grid-template-columns: repeat(3, minmax(0, 300px)); gap: 20px; width: 100%; justify-content: center; }
   @media (max-width: 600px) { .games { grid-template-columns: minmax(0, 360px); } }
@@ -119,8 +126,8 @@
   /* Phones sideways are short: all three games side by side, no scrolling */
   @media (orientation: landscape) and (max-height: 500px) {
     body { padding: 10px 16px 14px; justify-content: center; }
-    h1 { margin-top: 0; font-size: 2.2rem; }
-    .sub { margin: 4px 0 16px; font-size: 1rem; }
+    h1 { margin-top: 0; font-size: 2.3rem; }
+    .sub { margin: 4px 0 18px; padding: 2px 12px; font-size: .95rem; box-shadow: 0 3px 0 #0A1020; }
     .games { grid-template-columns: repeat(3, minmax(0, 300px)); gap: 12px; }
     .game { padding: 8px 8px 12px; border-radius: 20px; box-shadow: 0 6px 0 var(--ink); }
     .art { font-size: 2.1rem; padding: 9px 4px 5px; border-radius: 14px; }
