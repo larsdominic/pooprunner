@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Poop Runner</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%2387CEEB'/%3E%3Crect y='68' width='100' height='32' fill='%232E7D32'/%3E%3Ctext x='50' y='58' font-size='60' text-anchor='middle' dominant-baseline='central'%3E%F0%9F%92%A9%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Titan+One&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html { touch-action: manipulation; }   /* no double-tap zoom */
@@ -44,48 +46,88 @@
     animation: wobble 1.2s ease-in-out infinite;
   }
   @keyframes wobble { 0%, 100% { transform: rotate(-2deg); } 50% { transform: rotate(2deg); } }
-  .sub { margin: 10px 0 28px; color: #fff; font-weight: bold; font-size: 1.1rem; text-shadow: 1px 1px 3px rgba(0, 0, 0, .35); text-align: center; }
+  .sub { margin: 10px 0 34px; color: #fff; font-weight: bold; font-size: 1.1rem; text-shadow: 1px 1px 3px rgba(0, 0, 0, .35); text-align: center; }
 
   .games { display: grid; grid-template-columns: repeat(3, minmax(0, 300px)); gap: 20px; width: 100%; justify-content: center; }
   @media (max-width: 600px) { .games { grid-template-columns: minmax(0, 360px); } }
 
+  /* The cards wear PoopMatch's look: cream paper, a fat dark outline, a solid drop underneath, the game's lettering */
   .game {
-    display: flex; flex-direction: column; align-items: center; text-align: center;
-    background: #fffaf0; border: 4px solid #fff; border-radius: 24px;
-    padding: 22px 18px 20px; text-decoration: none; color: inherit;
-    box-shadow: 0 8px 0 rgba(0, 0, 0, .15), 0 14px 30px rgba(0, 0, 0, .15);
-    transition: transform .15s ease, box-shadow .15s ease;
+    --ink: #0A1020; --tilt: -2deg;
+    position: relative; display: flex; flex-direction: column; align-items: center; text-align: center;
+    background: #FFF7E0; border: 4px solid var(--ink); border-radius: 26px;
+    padding: 14px 14px 20px; text-decoration: none; color: var(--ink);
+    font-family: "Nunito", ui-rounded, "Arial Rounded MT Bold", system-ui, sans-serif; font-weight: 700;
+    box-shadow: 0 8px 0 var(--ink);
+    transform: rotate(var(--tilt));
+    transition: transform .16s cubic-bezier(.3, 1.6, .5, 1), box-shadow .12s;
+    animation: land .55s cubic-bezier(.3, 1.4, .5, 1) both;
   }
-  .game:hover, .game:focus-visible { transform: translateY(-4px) rotate(-1deg); box-shadow: 0 12px 0 rgba(0, 0, 0, .15), 0 20px 36px rgba(0, 0, 0, .2); }
+  .game.three { --tilt: 1.5deg; animation-delay: .1s; }
+  .game.match { --tilt: -1deg; animation-delay: .2s; }
+  @keyframes land { from { transform: translateY(40px) rotate(8deg) scale(.6); opacity: 0; } }
+  .game:hover, .game:focus-visible { transform: translateY(-6px) rotate(0deg) scale(1.03); box-shadow: 0 14px 0 var(--ink); }
   .game:focus-visible { outline: 4px solid #2f7dff; outline-offset: 4px; }   /* keyboard: same blue ring as the games */
-  .game:active { transform: translateY(2px); box-shadow: 0 4px 0 rgba(0, 0, 0, .15); }
+  .game:active { transform: translateY(6px) rotate(0deg); box-shadow: 0 2px 0 var(--ink); }
 
-  .art { font-size: 4rem; line-height: 1; height: 4.4rem; display: flex; align-items: flex-end; gap: 4px; }
+  /* the pictures stand on a little coloured stage; PoopMatch gets its tiled bathroom wall */
+  .art {
+    width: 100%; font-size: 4rem; line-height: 1; padding: 16px 4px 12px;
+    display: flex; align-items: flex-end; justify-content: center; gap: 4px;
+    border: 3px solid var(--ink); border-radius: 18px; background: #FF8A5C;
+  }
+  .game.three .art { background: #7BD45A; }
+  .game.match .art {
+    background-color: #0E182C;
+    background-image: linear-gradient(#0E182C 3px, transparent 3px), linear-gradient(90deg, #0E182C 3px, transparent 3px), linear-gradient(#1B2F55, #1B2F55);
+    background-size: 32px 32px, 32px 32px, auto;
+  }
+  .art > * { transition: transform .16s cubic-bezier(.3, 1.6, .5, 1); }
+  .game:hover .art > :not(.bob) { transform: scale(1.12, .9); }   /* a little squash, like the game's characters */
   .art img { height: 1em; width: 1em; }   /* PoopMatch characters, the size of the emoji */
   .art .bob { display: inline-block; animation: bob .5s ease-in-out infinite alternate; }
   @keyframes bob { to { transform: translateY(-10px); } }
-  .game h2 { margin-top: 12px; font-size: 1.6rem; color: #6b3f17; }
-  .game p { margin: 6px 0 16px; font-size: 1rem; line-height: 1.35; color: #5a4630; }
-  .play {
-    margin-top: auto; display: inline-block; padding: 12px 30px;   /* auto: the buttons line up along the bottom of the cards */ border-radius: 999px;
-    background: #FF6B35; color: #fff; font-weight: 800; font-size: 1.15rem; letter-spacing: .03em;
-    box-shadow: 0 4px 0 #c94a1c;
+
+  /* a tilted sticker on the corner */
+  .tag {
+    position: absolute; top: -14px; right: -10px; z-index: 1;
+    background: #FFC62E; border: 3px solid var(--ink); border-radius: 12px; box-shadow: 0 4px 0 var(--ink);
+    padding: 3px 10px; font-weight: 800; font-size: .9rem; transform: rotate(7deg);
   }
-  .game.three .play { background: #2E7D32; box-shadow: 0 4px 0 #1b5e20; }
-  .game.match .play { background: #1976D2; box-shadow: 0 4px 0 #0d4a8f; }
-  @media (min-width: 601px) and (max-width: 900px) { .art { font-size: 3rem; height: 3.3rem; } }   /* three narrow cards: the pictures stay inside */
+  .game.three .tag { transform: rotate(-6deg); right: auto; left: -10px; }
+
+  /* the game's lettering: white, fat, with a dark outline and a drop */
+  .game h2 {
+    margin-top: 14px; font-family: "Titan One", "Arial Rounded MT Bold", system-ui, sans-serif; font-weight: 400; font-size: 1.75rem; line-height: 1.1;
+    color: #fff; -webkit-text-stroke: .16em var(--ink); paint-order: stroke fill; text-shadow: 0 .09em 0 var(--ink); letter-spacing: .03em;
+  }
+  .game p { margin: 8px 0 16px; font-size: 1rem; line-height: 1.35; }
+  /* the game's buttons: a slab with a lip that squashes when pressed */
+  .play {
+    margin-top: auto;   /* the buttons line up along the bottom of the cards */
+    display: inline-block; padding: 10px 26px; border: 3px solid var(--ink); border-radius: 16px;
+    background: #FFC62E; color: var(--ink); font-weight: 800; font-size: 1.15rem;
+    box-shadow: 0 6px 0 var(--ink); transition: transform .12s, box-shadow .12s;
+  }
+  .game.three .play { background: #7BD45A; }
+  .game.match .play { background: #3FA9F5; color: #fff; }
+  .game:hover .play { transform: translateY(2px); box-shadow: 0 4px 0 var(--ink); }
+  .game:active .play { transform: translateY(6px); box-shadow: 0 0 0 var(--ink); }
+  @media (min-width: 601px) and (max-width: 900px) { .art { font-size: 3rem; } .game h2 { font-size: 1.15rem; letter-spacing: 0; color: var(--ink); -webkit-text-stroke: 0; text-shadow: none; } }   /* three narrow cards: everything stays inside */
+  @media (prefers-reduced-motion: reduce) { .game { animation: none; } }
 
   /* Phones sideways are short: all three games side by side, no scrolling */
   @media (orientation: landscape) and (max-height: 500px) {
     body { padding: 10px 16px 14px; justify-content: center; }
     h1 { margin-top: 0; font-size: 2.2rem; }
-    .sub { margin: 4px 0 12px; font-size: 1rem; }
+    .sub { margin: 4px 0 16px; font-size: 1rem; }
     .games { grid-template-columns: repeat(3, minmax(0, 300px)); gap: 12px; }
-    .game { padding: 12px 14px 14px; border-radius: 20px; }
-    .art { font-size: 2.6rem; height: 2.9rem; }
-    .game h2 { margin-top: 6px; font-size: 1.3rem; }
-    .game p { margin: 4px 0 10px; font-size: .9rem; }
-    .play { padding: 9px 24px; font-size: 1rem; }
+    .game { padding: 8px 8px 12px; border-radius: 20px; box-shadow: 0 6px 0 var(--ink); }
+    .art { font-size: 2.1rem; padding: 9px 4px 5px; border-radius: 14px; }
+    .tag { top: -10px; font-size: .8rem; padding: 2px 8px; }
+    .game h2 { margin-top: 8px; font-size: 1.2rem; color: var(--ink); -webkit-text-stroke: 0; text-shadow: none; }   /* small cards: plain dark lettering stays readable */
+    .game p { margin: 4px 0 8px; font-size: .85rem; line-height: 1.25; }
+    .play { padding: 5px 18px; font-size: 1rem; box-shadow: 0 4px 0 var(--ink); }
     .sun { top: 12px; right: 5%; width: 44px; height: 44px; }
     .cloud1 { top: 22px; }
     .cloud2 { top: 12px; }
@@ -123,12 +165,14 @@
 
   <main class="games">
     <a class="game" href="2d/">
+      <span class="tag">The original</span>
       <div class="art"><span class="bob">🏃</span><span>💩</span></div>
       <h2>Poop Runner</h2>
-      <p>The original. Jump the poops before they splat you!</p>
+      <p>Jump the poops before they splat you!</p>
       <span class="play">Play</span>
     </a>
     <a class="game three" href="3d/">
+      <span class="tag">In 3D!</span>
       <div class="art"><span>🧻</span><span class="bob">🐕</span><span>💩</span></div>
       <h2>Poop Runner 3D</h2>
       <p>Clean up the dog park with a toilet-paper blaster, then beat King Poop.</p>
@@ -136,9 +180,10 @@
     </a>
     <!-- PoopMatch is an iPhone app: this card opens its App Store page -->
     <a class="game match" href="https://apps.apple.com/app/id6835457128" target="_blank" rel="noopener">
+      <span class="tag">iPhone app</span>
       <div class="art"><img src="poopmatch/bean.png" alt=""><img class="bob" src="poopmatch/poop.png" alt=""><img src="poopmatch/gold.png" alt=""></div>
       <h2>PoopMatch</h2>
-      <p>Drop, match and merge your way to the golden poop. For iPhone.</p>
+      <p>Drop, match and merge your way to the golden poop.</p>
       <span class="play">App Store</span>
     </a>
   </main>
