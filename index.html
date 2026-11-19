@@ -33,12 +33,18 @@
 
   body {
     min-height: 100dvh;
-    background: linear-gradient(180deg, #87CEEB 0%, #87CEEB 62%, #90EE90 62%, #228B22 100%);
     font-family: sans-serif;
     color: #3b2a14;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     padding: 24px max(16px, env(safe-area-inset-right, 0px)) 24px max(16px, env(safe-area-inset-left, 0px));   /* cards stay clear of the camera notch */
     overflow-x: hidden;
+  }
+
+  /* Sky and grass are pinned to the whole screen, behind everything. Not on the body: in Chrome on iPhone, held
+     sideways, the page is narrower than the screen, and the grass stopped short of the right edge. */
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: -2;
+    background: linear-gradient(180deg, #87CEEB 0%, #87CEEB 62%, #90EE90 62%, #228B22 100%);
   }
 
   .sun {
