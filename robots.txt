@@ -1,0 +1,5 @@
+# Everything on pooprunner.lol may be crawled
+User-agent: *
+Allow: /
+
+Sitemap: https://pooprunner.lol/sitemap.xml
