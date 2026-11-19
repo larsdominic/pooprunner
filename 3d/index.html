@@ -44,7 +44,8 @@
   }
   [hidden] { display: none !important; }
   html, body { height: 100%; margin: 0; }
-  html { touch-action: manipulation; -webkit-text-size-adjust: 100%; }   /* no double-tap zoom */
+  /* no double-tap zoom; sky colour behind the page, so the strip beside the iPhone notch isn't left white */
+  html { touch-action: manipulation; -webkit-text-size-adjust: 100%; background: #bfe4ff; }
   body {
     box-sizing: border-box;
     background: linear-gradient(var(--sky), #e6f5ff 60%, #cfe9b8);

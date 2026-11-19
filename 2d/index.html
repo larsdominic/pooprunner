@@ -467,7 +467,7 @@
 
   .score {
     position: absolute;
-    top: 16px; left: max(16px, env(safe-area-inset-left, 0px));   /* clear of the camera notch */
+    top: 20px; left: calc(max(12px, env(safe-area-inset-left, 0px)) + 56px);   /* right of the pause button, clear of the camera notch */
     font-size: 1.4rem;
     font-weight: bold;
     color: white;
@@ -476,7 +476,8 @@
   /* Pause: everything stops where it is; a card offers Resume or the main menu */
   body.paused *, body.paused *::before, body.paused *::after { animation-play-state: paused !important; }
   .pause-btn {
-    position: absolute; top: 12px; right: max(12px, env(safe-area-inset-right, 0px)); z-index: 50;   /* clear of the camera notch */
+    /* top left, like the 3D game: Chrome on iPhone covers the right-hand strip beside the camera notch, and a button there can't be seen */
+    position: absolute; top: 12px; left: max(12px, env(safe-area-inset-left, 0px)); z-index: 50;
     width: 44px; height: 44px; border-radius: 50%;
     border: 3px solid #fff; background: rgba(0,0,0,0.25); color: #fff;
     font: bold 16px/1 sans-serif; cursor: pointer;
