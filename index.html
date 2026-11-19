@@ -2,14 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<!-- viewport-fit=cover: on an iPhone held sideways the page also fills the strip beside the camera notch (it was left white) -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Poop Runner</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%2387CEEB'/%3E%3Crect y='68' width='100' height='32' fill='%232E7D32'/%3E%3Ctext x='50' y='58' font-size='60' text-anchor='middle' dominant-baseline='central'%3E%F0%9F%92%A9%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Titan+One&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html { touch-action: manipulation; }   /* no double-tap zoom */
+  html { touch-action: manipulation; background: #87CEEB; }   /* no double-tap zoom; sky colour wherever the page doesn't reach */
 
   body {
     min-height: 100dvh;
@@ -17,7 +18,7 @@
     font-family: sans-serif;
     color: #3b2a14;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 24px 16px;
+    padding: 24px max(16px, env(safe-area-inset-right, 0px)) 24px max(16px, env(safe-area-inset-left, 0px));   /* cards stay clear of the camera notch */
     overflow-x: hidden;
   }
 
@@ -125,7 +126,7 @@
 
   /* Phones sideways are short: all three games side by side, no scrolling */
   @media (orientation: landscape) and (max-height: 500px) {
-    body { padding: 10px 16px 14px; justify-content: center; }
+    body { padding: 10px max(16px, env(safe-area-inset-right, 0px)) 14px max(16px, env(safe-area-inset-left, 0px)); justify-content: center; }
     h1 { margin-top: 0; font-size: 2.3rem; }
     .sub { margin: 4px 0 18px; padding: 2px 12px; font-size: .95rem; box-shadow: 0 3px 0 #0A1020; }
     .games { grid-template-columns: repeat(3, minmax(0, 300px)); gap: 12px; }
