@@ -800,7 +800,7 @@
   document.addEventListener('keydown', (e) => {
     if (e.code === 'Escape' || e.code === 'KeyP') {
       e.preventDefault();
-      if (dead) { if (e.code === 'Escape') restart(); return; }   // on the splat screen Esc tries again
+      if (dead) { if (e.code === 'Escape') tryRestart(); return; }   // on the splat screen Esc tries again
       if (paused) resume(); else pause();
       return;
     }
@@ -842,9 +842,15 @@
 
   function triggerJump() {
     if (paused) return;
-    if (dead) return restart();
-    // A tap while still in the air is remembered: if it came just before landing, the kid jumps again on landing
+    if (dead) return tryRestart();
+    // A tap while still in the air is remembered: if it came just before landing, the kid jumps again after landing
     if (jumping) { jumpTapAt = performance.now(); return; }
+    // Just landed: he has to touch the ground for a moment before the next jump (see LAND_MS); the tap isn't lost
+    const sinceLanding = performance.now() - landedAt;
+    if (sinceLanding < LAND_MS) {
+      if (!landTimer) landTimer = setTimeout(() => { landTimer = 0; if (!dead) triggerJump(); }, LAND_MS - sinceLanding);
+      return;
+    }
     jumping = true;
     sfx('jump');
     wrapper.classList.remove('jumping');
@@ -853,13 +859,22 @@
   }
   let jumpTapAt = 0;
   const JUMP_MEMORY = 250;   // ms before landing in which a tap still counts
+  // Poops can't hit the kid while he's in the air, so jumps must not join up seamlessly: after every landing he is on
+  // the ground (and can be hit) for LAND_MS before the next jump starts. Without it, mashing the button never loses.
+  const LAND_MS = 160;
+  let landedAt = -1e9, landTimer = 0;
+  // The splat screen stays for a moment: taps still coming from the mashing must not skip it
+  const RESTART_LOCK = 800;  // ms
+  let deadAt = 0;
+  function tryRestart() { if (performance.now() - deadAt >= RESTART_LOCK) restart(); }
   // One listener for every landing (a one-off listener could be used up by another animation ending and leave the kid
   // "still jumping", deaf to taps)
   wrapper.addEventListener('animationend', (ev) => {
     if (ev.target !== wrapper || ev.animationName !== 'jumpArc') return;
     wrapper.classList.remove('jumping');
     jumping = false;
-    if (!dead && !paused && performance.now() - jumpTapAt < JUMP_MEMORY) triggerJump();
+    landedAt = performance.now();
+    if (!dead && !paused && landedAt - jumpTapAt < JUMP_MEMORY) triggerJump();
   });
 
   function getRect(el) {
@@ -960,6 +975,9 @@
 
   function gameOver() {
     dead = true;
+    deadAt = performance.now();
+    clearTimeout(landTimer); landTimer = 0;
+    clearTimeout(lickTimer); clearInterval(heartTimer);
     document.body.classList.add('dead');
     document.getElementById('dead-menu').hidden = false;
     sfx('splat');
@@ -995,8 +1013,11 @@
     label.style.fontSize = '2.5rem';
     label.style.animation = 'none';
 
-    // Restart hint
-    document.querySelector('.hint').textContent = HINT_DEAD;
+    // Restart hint, shown once a tap restarts again
+    const hint = document.querySelector('.hint');
+    hint.style.visibility = 'hidden';
+    hintTimer = setTimeout(() => { hint.style.visibility = ''; }, RESTART_LOCK);
+    hint.textContent = HINT_DEAD;
 
     // Dog trots over to comfort the fallen kid, then licks its face with love hearts
     dog.classList.remove('jumping');
@@ -1007,7 +1028,7 @@
     const offset = isMobile ? -45 : 30;
     const targetLeft = kr.left - offset;
     dog.style.left = targetLeft + 'px';
-    setTimeout(() => {
+    lickTimer = setTimeout(() => {
       if (!dead) return;               // player may have restarted
       dog.classList.add('licking');
       spawnHearts();
@@ -1015,7 +1036,7 @@
     }, 1050);
   }
 
-  let heartTimer;
+  let heartTimer, lickTimer, hintTimer;
   function spawnHearts() {
     const dr = getRect(dog);
     for (let i = 0; i < 3; i++) {
@@ -1033,6 +1054,8 @@
     dead = false;
     // splatted in mid-air: the jump never finished, so end it here (taps would be ignored otherwise)
     jumping = false; jumpTapAt = 0;
+    clearTimeout(landTimer); landTimer = 0; landedAt = -1e9;
+    clearTimeout(lickTimer); clearTimeout(hintTimer);
     wrapper.classList.remove('jumping');
     clearAt = 0;
     document.body.classList.remove('dead');
@@ -1056,6 +1079,7 @@
     label.textContent = 'James and Harry Poop Runner';
     label.style.fontSize = '';
     label.style.animation = '';
+    document.querySelector('.hint').style.visibility = '';
     document.querySelector('.hint').textContent = HINT_PLAY;
     loop();
     clearTimeout(spawnTimer);
